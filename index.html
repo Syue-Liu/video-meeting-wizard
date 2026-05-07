@@ -80,8 +80,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .form-grp{margin-bottom:13px}
 .form-lbl{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
 .form-lbl.req::after{content:' *';color:#e24b4a}
-.form-inp{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--card);color:var(--text);outline:none;transition:border-color .2s}
+.form-inp{width:100%;min-height:46px;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--card);color:var(--text);outline:none;transition:border-color .2s}
 .form-inp:focus{border-color:var(--teal-mid)}
+.form-inp[type="date"],.form-inp[type="datetime-local"]{height:46px;min-height:46px;line-height:20px;-webkit-appearance:none;appearance:none}
+.form-inp[type="date"]::-webkit-date-and-time-value,.form-inp[type="datetime-local"]::-webkit-date-and-time-value{min-height:20px;text-align:left}
+.form-inp[type="date"]::-webkit-calendar-picker-indicator,.form-inp[type="datetime-local"]::-webkit-calendar-picker-indicator{margin-left:auto}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* counter */
@@ -137,6 +140,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
   .hdr,.nav-bar{max-width:none}
   .form-row{grid-template-columns:1fr;gap:0}
   .form-inp,.att-input{font-size:16px;min-width:0}
+  .form-inp[type="date"],.form-inp[type="datetime-local"]{height:52px;min-height:52px;padding-top:0;padding-bottom:0;line-height:52px}
+  .form-inp[type="date"]::-webkit-date-and-time-value,.form-inp[type="datetime-local"]::-webkit-date-and-time-value{line-height:20px}
   .sync-sheet{width:calc(100% - 16px);bottom:8px;padding:14px;border-radius:16px}
   .sync-grid{grid-template-columns:1fr}
   .sync-btn,.btn-full,.btn-reset{min-height:48px}
