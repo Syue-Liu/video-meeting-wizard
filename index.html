@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>視訊會議需求精靈</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#0F6E56;--teal-mid:#1D9E75;--teal-light:#E1F5EE;--teal-dark:#085041;
+  --accent:#5DCAA5;--text:#111827;--muted:#6B7280;--border:#E5E7EB;
+  --bg:#F3F4F2;--card:#FFFFFF;
+  --live:#7C3AED;--live-light:#EDE9FE;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto}
+.hdr{background:var(--teal);padding:14px 16px 12px;position:sticky;top:0;z-index:50}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hdr-title{color:#fff;font-size:15px;font-weight:600}
+.hdr-actions{display:flex;align-items:center;gap:7px}
+.step-badge{background:rgba(255,255,255,0.2);color:#fff;font-size:12px;padding:3px 10px;border-radius:12px}
+.sync-mini{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;cursor:pointer;font-family:inherit}
+.prog-track{height:4px;background:rgba(255,255,255,0.25);border-radius:2px}
+.prog-bar{height:100%;background:var(--accent);border-radius:2px;transition:width 0.35s ease}
+.wrap{padding:16px 14px 110px}
+.step-q{margin-bottom:18px}
+.step-q h2{font-size:20px;font-weight:700;line-height:1.3;margin-bottom:5px}
+.step-q p{font-size:13px;color:var(--muted);line-height:1.5}
+
+/* option cards – VIDEO (teal) */
+.opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.opt-card.sel{border-color:var(--teal);background:#f7fdfb}
+.opt-top{padding:13px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.opt-icon{width:42px;height:42px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.opt-card.sel .opt-icon{background:var(--teal-light)}
+.opt-info{flex:1;min-width:0}
+.opt-name{font-size:15px;font-weight:600}
+.opt-tag{font-size:11px;color:var(--teal);background:var(--teal-light);padding:2px 8px;border-radius:8px;display:inline-block;margin-top:3px;font-weight:500}
+.opt-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.chk{width:22px;height:22px;border-radius:11px;border:2px solid var(--border);transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:transparent;font-size:12px}
+.opt-card.sel .chk{background:var(--teal);border-color:var(--teal);color:#fff}
+.exp-btn{width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:10px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.exp-area{display:none;border-top:1px solid var(--border)}
+.exp-area.open{display:block}
+.inf-field{padding:11px 14px;border-bottom:1px solid #f0f0f0}
+.inf-field:last-child{border-bottom:none}
+.inf-lbl{font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.edtf{width:100%;font-family:inherit;font-size:13px;color:var(--text);line-height:1.65;border:none;background:transparent;resize:none;outline:none;padding:0;cursor:pointer;overflow:hidden;min-height:36px}
+.edtf:focus{cursor:text;background:#f0faf6;border:1.5px solid var(--accent);border-radius:8px;padding:8px}
+.edit-hint{font-size:10px;color:var(--accent);margin-top:4px;opacity:.8}
+
+/* LIVE (purple) overrides */
+.opt-card.live .opt-tag{color:var(--live);background:var(--live-light)}
+.opt-card.live.sel{border-color:var(--live);background:#faf9ff}
+.opt-card.live.sel .opt-icon{background:var(--live-light)}
+.opt-card.live.sel .chk{background:var(--live);border-color:var(--live);color:#fff}
+.opt-card.live .inf-lbl{color:var(--live)}
+.opt-card.live .edtf:focus{background:#f8f5ff;border-color:var(--live)}
+
+/* group header between platform sections */
+.grp-hdr{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.grp-hdr-line{flex:1;height:1px;background:var(--border)}
+.grp-hdr-lbl{font-size:11px;font-weight:700;letter-spacing:.6px;padding:3px 10px;border-radius:10px;white-space:nowrap}
+.grp-hdr-lbl.video{background:var(--teal-light);color:var(--teal-dark)}
+.grp-hdr-lbl.live{background:var(--live-light);color:var(--live)}
+
+/* attendees */
+.att-presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.att-chip{padding:9px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:14px;cursor:pointer;background:var(--card);color:var(--text);transition:all .18s;-webkit-tap-highlight-color:transparent;font-weight:500}
+.att-chip.sel{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+.att-divider{display:flex;align-items:center;gap:8px;margin:4px 0 14px}
+.att-divider span{font-size:12px;color:var(--muted);white-space:nowrap}
+.att-divider::before,.att-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.att-custom-row{display:flex;align-items:center;gap:8px}
+.att-input{flex:1;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--card);color:var(--text);outline:none;transition:border-color .2s}
+.att-input:focus{border-color:var(--teal-mid)}
+.att-unit{font-size:14px;color:var(--muted);white-space:nowrap}
+.att-note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;background:var(--teal-light);border-radius:9px;padding:9px 12px;color:var(--teal-dark)}
+
+/* form */
+.form-grp{margin-bottom:13px}
+.form-lbl{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.form-lbl.req::after{content:' *';color:#e24b4a}
+.form-inp{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--card);color:var(--text);outline:none;transition:border-color .2s}
+.form-inp:focus{border-color:var(--teal-mid)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* counter */
+.ctr-wrap{display:inline-flex;align-items:center;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card);margin-top:10px}
+.ctr-btn{width:42px;height:42px;background:var(--bg);border:none;font-size:22px;color:var(--teal);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.ctr-btn:active{background:var(--teal-light)}
+.ctr-val{width:52px;text-align:center;font-size:16px;font-weight:600;border-left:1px solid var(--border);border-right:1px solid var(--border);height:42px;display:flex;align-items:center;justify-content:center}
+.sub-blk{background:var(--bg);border-radius:10px;padding:12px 14px;margin-top:10px}
+.sub-lbl{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:500}
+
+/* nav */
+.nav-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);border-top:1px solid var(--border);padding:10px 14px 16px;display:flex;gap:9px;max-width:480px;margin:0 auto;backdrop-filter:blur(8px)}
+.btn-back{padding:13px 18px;border:1.5px solid var(--border);border-radius:12px;background:var(--card);color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.btn-next{flex:1;padding:13px;border:none;border-radius:12px;background:var(--teal);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s;-webkit-tap-highlight-color:transparent}
+.btn-next:active{background:var(--teal-dark)}
+.btn-line{background:#00B900}.btn-line:active{background:#009600}
+
+/* done */
+.done-hero{text-align:center;padding:28px 0 18px}
+.done-ico{font-size:54px;margin-bottom:10px}
+.done-ttl{font-size:22px;font-weight:700;margin-bottom:5px}
+.done-sub{font-size:13px;color:var(--muted);line-height:1.5}
+.msg-bubble{background:#f0f0f0;border-radius:4px 14px 14px 14px;padding:14px 15px;font-size:13px;line-height:1.75;white-space:pre-wrap;color:#1a1a1a;margin:14px 0;font-family:'Noto Sans TC',sans-serif}
+.btn-full{width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px}
+.btn-mail{background:#2563EB}
+.btn-pdf{background:#7C3AED}
+.btn-share{background:#0F6E56}
+.btn-reset{width:100%;padding:13px;background:transparent;border:1.5px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.info-banner{background:var(--teal-light);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--teal-dark);line-height:1.5;margin-top:8px}
+.toast{position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-8px);background:#111;color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.sync-backdrop{position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:800;display:none}
+.sync-backdrop.show{display:block}
+.sync-sheet{position:fixed;left:50%;bottom:12px;width:calc(100% - 24px);max-width:456px;max-height:calc(100vh - 28px);overflow:auto;transform:translateX(-50%) translateY(16px);background:#fff;border-radius:18px;padding:16px;z-index:850;box-shadow:0 24px 60px rgba(17,24,39,.28);display:none}
+.sync-sheet.show{display:block;animation:sheetIn .22s ease forwards}
+.sync-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.sync-k{font-size:11px;color:var(--teal);font-weight:700;letter-spacing:.5px;margin-bottom:3px}
+.sync-ttl{font-size:20px;font-weight:800}
+.sync-close{width:42px;height:42px;border:1px solid var(--border);border-radius:12px;background:#fff;font-size:14px;font-weight:700;color:var(--text);cursor:pointer}
+.sync-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}
+.sync-btn{padding:12px;border:1.5px solid var(--border);border-radius:12px;background:#fff;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.sync-btn.primary{border-color:var(--teal);background:var(--teal);color:#fff}
+.sync-status{font-size:12px;color:var(--muted);line-height:1.55;background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:10px}
+.sync-file{display:none}
+@keyframes sheetIn{to{transform:translateX(-50%) translateY(0)}}
+.slide-fwd{animation:sfwd .28s ease}
+.slide-bk{animation:sbk .28s ease}
+@keyframes sfwd{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
+@keyframes sbk{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
+@media print{
+  body{max-width:none;background:#fff}
+  .hdr,.nav-bar,.sync-backdrop,.sync-sheet,.toast,.btn-full,.btn-reset{display:none!important}
+  .wrap{padding:0}
+  .msg-bubble{background:#fff;border:1px solid #ddd;border-radius:8px;color:#111;font-size:12pt}
+}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-title">📋 視訊會議需求精靈</div>
+    <div class="hdr-actions">
+      <button class="sync-mini" onclick="openSync()">同步</button>
+      <div class="step-badge" id="sb">1 / 13</div>
+    </div>
+  </div>
+  <div class="prog-track"><div class="prog-bar" id="pb" style="width:7%"></div></div>
+</div>
+
+<div id="main-wrap" class="wrap slide-fwd"></div>
+
+<div class="nav-bar">
+  <button class="btn-back" id="btn-bk" onclick="goPrev()" style="display:none">← 上一題</button>
+  <button class="btn-next" id="btn-nx" onclick="goNext()">下一題 →</button>
+</div>
+
+<div class="sync-backdrop" id="sync-bd" onclick="closeSync()"></div>
+<div class="sync-sheet" id="sync-sh">
+  <div class="sync-head">
+    <div>
+      <div class="sync-k">GOOGLE SHEETS 同步</div>
+      <div class="sync-ttl">案件儲存</div>
+    </div>
+    <button class="sync-close" onclick="closeSync()">關閉</button>
+  </div>
+  <div class="form-grp">
+    <label class="form-lbl">Apps Script Web App 網址</label>
+    <input class="form-inp" id="sync-url" placeholder="https://script.google.com/macros/s/...">
+  </div>
+  <div class="sync-grid">
+    <button class="sync-btn primary" onclick="saveSyncSettings()">儲存設定</button>
+    <button class="sync-btn" onclick="copyBackendCode()">複製後端程式碼</button>
+    <button class="sync-btn primary" onclick="saveCaseToSheet()">儲存案件</button>
+    <button class="sync-btn" onclick="loadCaseList()">讀取案件</button>
+  </div>
+  <div class="form-grp">
+    <label class="form-lbl">最近案件</label>
+    <select class="form-inp" id="case-list"><option value="">尚未讀取</option></select>
+  </div>
+  <div class="sync-grid">
+    <button class="sync-btn primary" onclick="loadSelectedCase()">載入選取案件</button>
+    <button class="sync-btn" onclick="downloadCaseFile()">下載案件檔</button>
+    <button class="sync-btn" onclick="document.getElementById('case-file').click()">匯入案件檔</button>
+    <button class="sync-btn" onclick="resetSyncSettings()">清除同步設定</button>
+  </div>
+  <input class="sync-file" id="case-file" type="file" accept="application/json,.json">
+  <div class="sync-status" id="sync-status">第一次使用：把後端程式碼貼到 Google Sheets 的 Apps Script，部署成 Web App，再把網址貼回這裡。</div>
+</div>
+
+<div class="toast" id="toast">✅ 已複製到剪貼簿</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+
+const ATT_PRESETS = ['1,000 人以內','2,000 人以內','3,000 人以內','5,000 人以內','10,000 人以上'];
+
+const PLAT_VIDEO = [
+  {v:'Zoom',i:'📹',t:'最廣泛使用',g:'video',
+   d:'全球市占率最高的視訊會議平台，介面直覺，穩定性優異。支援最多 1,000 人同時連線，具備螢幕分享、虛擬背景、白板、分組討論室、雲端錄影等完整功能，跨平台相容性佳。',
+   s:'各類型企業會議、線上研討會、教育訓練、客戶簡報、跨國會議',
+   n:'免費版單次上限 40 分鐘；企業活動建議 Pro 以上付費方案；與會者需預先安裝 App 或使用瀏覽器版（功能較少）。'},
+  {v:'Google Meet',i:'🔵',t:'免安裝',g:'video',
+   d:'Google 推出的視訊會議，使用 Google 帳號直接在瀏覽器中加入，無需安裝軟體。與 Google 日曆深度整合，自動產生會議連結，操作門檻低。',
+   s:'已使用 Google Workspace 的企業、臨時性會議、快速召開的視訊通話、教育機構',
+   n:'個人免費版每次限 60 分鐘；功能相對陽春，不支援分組討論室（部分版本已加入）；通話品質依網路環境而異。'},
+  {v:'Cisco Webex',i:'🔒',t:'企業級安全',g:'video',
+   d:'思科旗下企業級視訊平台，安全性與加密規格業界最高，符合 GDPR、HIPAA 等法規標準，是政府機關、金融業、醫療業首選。支援最多 1,000 人，具備雲端錄影、即時翻譯等進階功能。',
+   s:'政府機關、金融業、法律及醫療產業、跨國企業、高度重視資安的組織',
+   n:'頻寬佔用相對較高；費用高於一般平台；操作介面學習曲線略高，建議提前讓主辦方熟悉。'},
+  {v:'Microsoft Teams',i:'🟪',t:'整合 Office 365',g:'video',
+   d:'Microsoft 365 生態系的核心協作工具，與 Word、Excel、SharePoint、OneNote 深度整合，可在會議中即時共編文件。視訊、通訊、文件管理三合一。',
+   s:'已採用 Microsoft 365 的企業、需在會議中協作文件的團隊、混合辦公環境',
+   n:'需有 Microsoft 365 授權（部分功能受授權層級限制）；非 M365 用戶以訪客身分加入，功能受限。'},
+  {v:'GotoMeeting',i:'🏢',t:'企業穩定',g:'video',
+   d:'LogMeIn 旗下企業視訊，介面簡潔，以穩定性著稱，支援最多 3,000 人的網路研討會（GoToWebinar）模式，提供完整錄影與出席分析報表，需付費訂閱。',
+   s:'大型企業研討會（Webinar）、業務培訓、法說會、需要詳細出席報表的正式活動',
+   n:'需付費訂閱，成本高於一般平台；在台灣知名度略低；建議提前寄送操作說明給與會者。'},
+  {v:'Microsoft Skype',i:'🌐',t:'輕量視訊',g:'video',
+   d:'Microsoft 旗下老牌視訊通話，支援最多 100 人免費通話，個人用戶認知度高，訪客連結加入無需帳號。介面簡潔，適合輕量型視訊需求。',
+   s:'小型 B2B 客戶溝通、臨時視訊通話、個人用戶熟悉的小型會議',
+   n:'Microsoft 已逐步將重心轉移至 Teams；不建議用於大型正式活動；企業版已停止服務。'},
+  {v:'Google Duo',i:'📞',t:'小型通話',g:'video',
+   d:'輕量級視訊通話，最多 32 人，畫質優異，操作極簡，主要針對個人用戶的 1 對 1 或小群組通話需求，不具備大型會議所需的進階功能。',
+   s:'少數人的非正式視訊通話、個人用戶的臨時性小型視訊',
+   n:'不建議用於企業正式會議；缺乏錄影、螢幕分享等功能；適合個人使用情境。'},
+  {v:'TeamViewer',i:'🖥️',t:'遠端控制',g:'video',
+   d:'主要定位為遠端桌面控制工具，視訊會議功能為輔助性質。若主要需求是視訊會議，建議優先考慮其他平台；若有技術支援或操作示範需求，可作為輔助工具。',
+   s:'技術支援、IT 維護、軟體操作示範、需要遠端控制電腦的技術性場合',
+   n:'不建議作為主要視訊會議平台；免費版限制商業使用；若純粹視訊需求請選擇其他平台。'},
+];
+
+const PLAT_LIVE = [
+  {v:'YouTube 直播',i:'▶️',t:'觀眾無上限',g:'live',
+   d:'全球最大影音平台，直播觀看人數無上限，全球觸及率最廣，支援自動存檔、影片回放。觀眾無需帳號即可觀看，適合大規模對外廣播。',
+   s:'大型對外發表會、品牌行銷活動、教育課程公開直播、演唱會直播',
+   n:'⚠️ 直播頻道需提前 24-48 小時完成驗證；注意版權音樂問題（可能被靜音）；訊號延遲約 20-30 秒。'},
+  {v:'Facebook 直播',i:'📘',t:'觸及粉絲',g:'live',
+   d:'直接在 Facebook 粉絲頁或社團直播，觸及現有粉絲社群，觀眾可即時留言、按愛心互動。設定相對簡便，無需複雜技術配置。',
+   s:'已有 Facebook 粉絲頁的品牌活動、社群行銷型活動、產品發表、企業說明會',
+   n:'演算法影響有機觸及率；訊號延遲約 10-15 秒；版權音樂同樣可能被偵測消音；建議配合廣告加強觸及。'},
+];
+
+const SD = [
+  {id:'basic',type:'form',title:'客戶基本資訊',sub:'填寫這次活動的聯絡資料'},
+  {id:'meeting_type',type:'single',key:'meetingType',title:'這次是哪種型式的會議？',sub:'依型式決定後續設備配置',opts:[
+    {v:'視訊會議',i:'🎦',t:'雙向互動',
+     d:'所有與會者皆可開啟攝影鏡頭與麥克風，能即時互動、發言提問。主辦方可控制與會者音視頻權限，適合需要充分討論的工作型會議。',
+     s:'內部會議、跨區協作、線上教育訓練、客戶簡報、中小型論壇 Q&A',
+     n:'與會者需安裝 App 或使用瀏覽器版；建議每位與會者網路至少 10 Mbps；可設定待議室（Waiting Room）管控進場。'},
+    {v:'直播',i:'📡',t:'單向廣播',
+     d:'主辦方完全掌控畫面輸出，觀眾僅能觀看（可透過留言區互動），觸及人數無上限。適合大量不特定觀眾的廣播型活動。',
+     s:'大型演講、產品發表會、頒獎典禮、對外宣傳性活動、公開演唱會',
+     n:'YouTube 直播需提前 24-48 小時開通驗證；Facebook 建議已有粉絲基礎；注意版權音樂偵測消音問題。'},
+    {v:'視訊 ＋ 直播',i:'🎬',t:'混合模式',
+     d:'同時進行遠端視訊與會（部分參與者可互動）並對外廣播直播。技術配置最複雜，需同時處理視訊訊號、導播切換及直播推流等多路訊號。',
+     s:'大型研討會、混合式國際論壇、有遠端講者同時對外轉播的活動',
+     n:'費用高於純視訊或純直播；需提前規劃訊號流程與導播腳本；強烈建議安排技術彩排確認各節點穩定。'},
+  ]},
+  {id:'attendees',type:'attendees',key:'attendees',title:'遠端線上與會人數？',sub:'選擇級距或直接輸入人數'},
+  {id:'platform',type:'platform',key:'platforms',title:'使用哪個視訊／直播平台？',sub:'可複選，點「詳情」展開說明；直播與視訊平台已分區'},
+  {id:'camera',type:'camera',key:'camera',title:'現場攝影機配置？',sub:'依活動規模與視覺需求決定攝影台數',opts:[
+    {v:'單機攝影',i:'📷',t:'基本配置',
+     d:'單台攝影機固定拍攝，通常架設於正前方或側前方，畫面呈現較靜態。是標準基本配置，成本較低，適合對畫面切換需求不高的場合。',
+     s:'小型內部會議、演講型活動、簡報發表、預算有限的活動',
+     n:'無法進行多角度切換；若講者移動範圍大，需配備附搖臂攝影機或請攝影師跟拍；適合靜態性質較高的場合。'},
+    {v:'多機攝影',i:'🎬',t:'多角度切換',
+     d:'2 台以上攝影機搭配導播台（Switcher）即時切換，可拍攝主講者特寫、全景、聽眾反應、PPT 畫面等多角度，視覺效果更豐富專業。',
+     s:'大型論壇、頒獎典禮、展演型活動、需高品質直播內容的正式活動',
+     n:'費用依台數線性增加；需搭配導播人員操作；建議提前規劃攝影機位置與切換腳本。'},
+  ]},
+  {id:'recording',type:'single',key:'recording',title:'是否需要錄影檔？',sub:'現場錄製的影片檔案交付方式',opts:[
+    {v:'需要・客戶自備 USB',i:'💾',t:'自備媒體',
+     d:'客戶自行準備 USB 隨身碟，現場錄製完畢後直接交付，不需額外耗材費用，是最常見的錄影交付方式。',
+     s:'客戶有 USB 且希望降低耗材成本',
+     n:'建議容量 32GB 以上、USB 3.0 規格；確認格式（FAT32 / exFAT）；1080P 影片每小時約需 8-15GB；請確認剩餘容量。'},
+    {v:'需要・我方提供 USB',i:'🗂️',t:'含耗材費',
+     d:'由我方準備 USB 隨身碟，現場錄製後連同隨身碟一起交付給客戶，費用含耗材成本。',
+     s:'客戶未準備隨身碟、或希望一站式服務',
+     n:'耗材費用依容量計入報價；可確認是否需要在錄影後進行基礎剪輯；活動結束當天即可交付。'},
+    {v:'不需要',i:'🚫',t:'無錄影',
+     d:'本次活動無錄影需求，僅進行現場視訊傳輸或直播，不保留影片檔案。',
+     s:'內部非正式會議、不需回放的活動、或另行透過平台雲端錄影功能自行處理',
+     n:'若日後有回看需求，可事先透過 Zoom、Google Meet 等平台的雲端錄影功能自行儲存（依版本而異）。'},
+  ]},
+  {id:'ppt',type:'single',key:'ppt',title:'是否需接入客戶電腦簡報？',sub:'確認 PPT / Keynote 等簡報的傳輸方式',opts:[
+    {v:'需要',i:'📊',t:'需確認規格',
+     d:'客戶的簡報需透過纜線接入我方設備，再傳輸至視訊畫面中分享。需事先確認電腦接頭規格並備妥對應轉接頭，避免現場規格不符。',
+     s:'客戶希望自行操控播放進度、使用動畫效果或嵌入影片的簡報',
+     n:'需確認接頭規格（HDMI / VGA / Mini DisplayPort / USB-C Thunderbolt）；備妥多種轉接頭；確認簡報軟體及嵌入影片格式相容性。'},
+    {v:'不需要',i:'✅',t:'無接入需求',
+     d:'客戶無需接入電腦，簡報已事先提供予我方統一管理，或本次活動不需呈現簡報內容。',
+     s:'簡報已事先交付、演講型活動無需簡報、純視訊討論型活動',
+     n:'若客戶臨時需要播放簡報，現場備妥轉接頭可彈性應對；建議活動前再次確認是否有臨時需求。'},
+  ]},
+  {id:'caption',type:'caption',key:'caption',title:'是否需要製作字卡？',sub:'字卡（Lower Third）顯示講者姓名、頭銜等資訊',opts:[
+    {v:'需要',i:'🪧',t:'含設計製作',
+     d:'在直播或視訊畫面下方疊加文字條（Lower Third），顯示會議名稱、講者姓名、職稱等資訊，提升畫面專業質感。可依客戶品牌色系客製化設計。',
+     s:'對外直播活動、多位講者輪番上台的論壇、頒獎典禮、需強化品牌識別的正式活動',
+     n:'請提前提供所有講者完整姓名與頭銜（中英文確認）；建議活動前 3-5 天確認名單；字卡數量影響製作費用。'},
+    {v:'不需要',i:'✅',t:'無字卡',
+     d:'本次活動不需在畫面疊加字卡，直接輸出原始視訊畫面。',
+     s:'內部會議、預算精簡的小型活動、非對外公開的視訊場合',
+     n:'若日後有需要，可在後製剪輯加入字卡，但效果與現場即時字卡不同；若活動中途需要字卡請提前告知。'},
+  ]},
+  {id:'timing',type:'timing',key:'linkTime',title:'線上連結提供時間？',sub:'填寫會議連結需要準備好的日期與時間'},
+  {id:'rehearsal',type:'single',key:'rehearsal',title:'是否需要付費技術彩排？',sub:'活動前安排專業技術測試與彩排確認',opts:[
+    {v:'需要',i:'🎬',t:'強烈建議',
+     d:'活動前安排完整技術彩排，測試所有設備、網路訊號、視訊品質、音訊同步、畫面切換流程等，確認萬無一失。彩排時間與人力另行計費。',
+     s:'首次合作客戶、複雜型活動（多機攝影 / 多講者）、對外直播的重要活動、高端商業活動',
+     n:'建議活動前 1-2 天安排，時間至少 1-2 小時；遠端講者必須參與確認連線狀況；彩排費用依時長與人力計入報價。'},
+    {v:'不需要',i:'⏩',t:'當天 Setup',
+     d:'不安排正式付費彩排，改為活動當天提前到場進行設備安裝與基本測試（Setup Time，通常 1-2 小時）。',
+     s:'熟悉客戶且活動設定相對簡單、預算考量、小型簡易會議',
+     n:'當天 Setup 仍建議提前至少 1 小時到場；建議客戶安排 IT 窗口現場協助；複雜型活動若不彩排，現場發生問題的風險較高。'},
+  ]},
+  {id:'interpret',type:'single',key:'interpret',title:'是否有口譯相關需求？',sub:'確認是否需要同步口譯設備與技術支援',opts:[
+    {v:'有口譯需求',i:'🌐',t:'需額外配置',
+     d:'活動中需要同步口譯服務，將主講人語言即時翻譯並透過獨立頻道傳送給聽眾。技術上需確認視訊平台是否支援口譯頻道功能，或另行架設獨立口譯系統。',
+     s:'國際論壇、跨國企業會議、有外籍講者或與會者的活動、政府涉外活動',
+     n:'Zoom 付費版（Business+）原生支援口譯頻道；Google Meet、Teams 需透過第三方方案；請提前告知語言種類與口譯員人數。'},
+    {v:'無口譯需求',i:'✅',t:'單語言活動',
+     d:'本次活動全程以單一語言進行，不需要同步口譯服務，技術配置相對單純。',
+     s:'全中文或全英文的內部/外部活動',
+     n:'若有部分外籍與會者，可在報名說明中標示活動語言以免誤會；若日後有口譯需求，Zoom 可在活動設定中事後開啟。'},
+  ]},
+  {id:'notes',type:'notes',key:'notes',title:'有其他補充說明嗎？',sub:'特殊需求、注意事項或備註（選填）'},
+  {id:'done',type:'done',title:'需求確認完成'}
+];
+
+// ── STATE ─────────────────────────────────────────────
+
+let cur=0,goBack=false;
+const F={
+  date:'',client:'',phone:'',clientEmail:'',vendorEmail:'',sales:'',venue:'',
+  meetingType:null,attendees:null,attendeesCustom:'',
+  platforms:[],camera:null,cameraCount:2,recording:null,
+  ppt:null,caption:null,captionCount:1,
+  linkTime:'',linkNote:'',rehearsal:null,interpret:null,notes:''
+};
+const SYNC_KEY='vc_demo_sync_settings_v1';
+let caseId=localStorage.getItem('vc_demo_case_id')||'';
+let syncSettings=loadSyncSettings();
+
+const APPS_SCRIPT_CODE=`const SHEET_NAME = '案件資料';
+const HEADERS = [
+  '案件ID','更新時間','活動日期','客戶名稱','聯絡電話','客戶Email','廠商Email','負責業務','會議廳／地點',
+  '會議型式','遠端人數','使用平台','攝影配置','錄影需求','接入PPT','字卡需求',
+  '連結時間','付費彩排','口譯需求','備註','LINE訊息','完整資料JSON'
+];
+
+function doPost(e) {
+  const payload = JSON.parse(e.postData.contents || '{}');
+  if (payload.action === 'draft') return createDraft_(payload);
+  const sheet = getSheet_();
+  const row = toRow_(payload);
+  const ids = sheet.getLastRow() > 1 ? sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues().flat() : [];
+  const index = ids.indexOf(payload.caseId);
+  if (index >= 0) sheet.getRange(index + 2, 1, 1, HEADERS.length).setValues([row]);
+  else sheet.appendRow(row);
+  return output_({ ok: true, caseId: payload.caseId });
+}
+
+function doGet(e) {
+  const action = e.parameter.action || 'list';
+  if (action === 'load') return output_(loadCase_(e.parameter.caseId), e.parameter.callback);
+  return output_(listCases_(), e.parameter.callback);
+}
+
+function getSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+  const first = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
+  if (first[0] !== HEADERS[0]) {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function toRow_(p) {
+  const f = p.form || {};
+  const attendees = f.attendeesCustom ? f.attendeesCustom + ' 人' : (f.attendees || '');
+  const camera = f.camera === '多機攝影' ? '多機攝影（' + f.cameraCount + ' 台）' : (f.camera || '');
+  const caption = f.caption === '需要' ? '需要（' + f.captionCount + ' 張）' : (f.caption || '');
+  return [
+    p.caseId || Utilities.getUuid(), new Date(), f.date || '', f.client || '', f.phone || '',
+    f.clientEmail || '', f.vendorEmail || '', f.sales || '', f.venue || '', f.meetingType || '', attendees, (f.platforms || []).join('、'),
+    camera, f.recording || '', f.ppt || '', caption, f.linkTime || '', f.rehearsal || '',
+    f.interpret || '', f.notes || '', p.message || '', JSON.stringify(p)
+  ];
+}
+
+function createDraft_(p) {
+  const to = p.to || '';
+  if (!to) return output_({ ok: false, error: '缺少收件人 Email' });
+  const subject = p.subject || '視訊會議需求確認';
+  const body = p.body || p.message || '';
+  const draft = GmailApp.createDraft(to, subject, body);
+  return output_({ ok: true, draftId: draft.getId(), to: to });
+}
+
+function listCases_() {
+  const sheet = getSheet_();
+  const last = sheet.getLastRow();
+  if (last < 2) return { ok: true, cases: [] };
+  const start = Math.max(2, last - 39);
+  const values = sheet.getRange(start, 1, last - start + 1, HEADERS.length).getValues().reverse();
+  const cases = values.map(function(row) {
+    return { caseId: row[0], updatedAt: row[1], date: row[2], client: row[3], meetingType: row[9] };
+  });
+  return { ok: true, cases: cases };
+}
+
+function loadCase_(id) {
+  const sheet = getSheet_();
+  const last = sheet.getLastRow();
+  if (last < 2) return { ok: false, error: '尚無案件' };
+  const values = sheet.getRange(2, 1, last - 1, HEADERS.length).getValues();
+  for (var i = 0; i < values.length; i++) {
+    if (values[i][0] === id) return { ok: true, case: JSON.parse(values[i][21] || '{}') };
+  }
+  return { ok: false, error: '找不到案件' };
+}
+
+function output_(data, callback) {
+  const text = callback ? callback + '(' + JSON.stringify(data) + ')' : JSON.stringify(data);
+  const mime = callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;
+  return ContentService.createTextOutput(text).setMimeType(mime);
+}`;
+
+function gDesc(sid,val,fld){return localStorage.getItem('d_'+sid+'_'+val+'_'+fld)||null}
+function sDesc(sid,val,fld,txt){localStorage.setItem('d_'+sid+'_'+val+'_'+fld,txt)}
+
+// ── RENDER ────────────────────────────────────────────
+
+function render(){
+  const s=SD[cur],tot=SD.length;
+  const pct=((cur+1)/tot*100).toFixed(0);
+  document.getElementById('sb').textContent=(cur+1)+' / '+tot;
+  document.getElementById('pb').style.width=pct+'%';
+  document.getElementById('btn-bk').style.display=cur===0?'none':'';
+  const nx=document.getElementById('btn-nx');
+  if(s.type==='done'){nx.style.display='none';}
+  else{nx.style.display='';nx.className='btn-next'+(cur===SD.length-2?' btn-line':'');
+       nx.textContent=cur===SD.length-2?'完成並預覽 ✓':'下一題 →';}
+  const wrap=document.getElementById('main-wrap');
+  wrap.className='wrap '+(goBack?'slide-bk':'slide-fwd');
+  wrap.innerHTML=buildStep(s);
+  bindStep(s);
+}
+
+function buildStep(s){
+  let h=s.type!=='done'?`<div class="step-q"><h2>${s.title}</h2><p>${s.sub||''}</p></div>`:'';
+  if(s.type==='form')h+=buildForm();
+  else if(s.type==='single')h+=buildOpts(s);
+  else if(s.type==='attendees')h+=buildAttendees();
+  else if(s.type==='platform')h+=buildPlatform();
+  else if(s.type==='camera')h+=buildCamera(s);
+  else if(s.type==='caption')h+=buildCaption(s);
+  else if(s.type==='timing')h+=buildTiming();
+  else if(s.type==='notes')h+=buildNotes();
+  else if(s.type==='done')h+=buildDone();
+  return h;
+}
+
+function buildForm(){
+  return `<div class="form-row">
+    <div class="form-grp"><label class="form-lbl req">活動日期</label><input class="form-inp" type="date" id="fd" value="${F.date}"></div>
+    <div class="form-grp"><label class="form-lbl req">客戶名稱</label><input class="form-inp" type="text" id="fc" placeholder="公司/姓名" value="${esc(F.client)}"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-grp"><label class="form-lbl req">聯絡電話</label><input class="form-inp" type="tel" id="fp" placeholder="09xx-xxx-xxx" value="${esc(F.phone)}"></div>
+    <div class="form-grp"><label class="form-lbl">負責業務</label><input class="form-inp" type="text" id="fs" placeholder="業務姓名" value="${esc(F.sales)}"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-grp"><label class="form-lbl">客戶 Email</label><input class="form-inp" type="email" id="fce" placeholder="client@example.com" value="${esc(F.clientEmail)}"></div>
+    <div class="form-grp"><label class="form-lbl">廠商 Email</label><input class="form-inp" type="email" id="fve" placeholder="vendor@example.com" value="${esc(F.vendorEmail)}"></div>
+  </div>
+  <div class="form-grp"><label class="form-lbl">會議廳／地點</label><input class="form-inp" type="text" id="fv" placeholder="場地名稱或地址" value="${esc(F.venue)}"></div>`;
+}
+
+// ── 與會人數 ──────────────────────────────────────────
+
+function buildAttendees(){
+  const chips=ATT_PRESETS.map(p=>`<div class="att-chip${F.attendees===p?' sel':''}" onclick="selAtt('${p}')">${p}</div>`).join('');
+  return `<div class="att-presets">${chips}</div>
+    <div class="att-divider"><span>或自填人數</span></div>
+    <div class="att-custom-row">
+      <input class="att-input" type="number" id="att-custom" placeholder="請輸入人數" min="1"
+        value="${esc(F.attendeesCustom)}" oninput="onAttCustom(this)">
+      <span class="att-unit">人</span>
+    </div>
+    <div class="att-note">人數影響平台授權費用與頻寬需求；超過 100 人建議使用企業付費方案，超過 1,000 人需使用 Webinar 或大型廣播模式。</div>`;
+}
+
+function selAtt(val){
+  F.attendees=F.attendees===val?null:val;
+  F.attendeesCustom='';
+  const inp=document.getElementById('att-custom');
+  if(inp)inp.value='';
+  document.querySelectorAll('.att-chip').forEach(c=>{
+    c.classList.toggle('sel',c.textContent.trim()===F.attendees);
+  });
+}
+
+function onAttCustom(inp){
+  F.attendeesCustom=inp.value;
+  F.attendees=null;
+  document.querySelectorAll('.att-chip').forEach(c=>c.classList.remove('sel'));
+}
+
+// ── 平台（分組）──────────────────────────────────────
+
+function buildPlatform(){
+  const sel=Array.isArray(F.platforms)?F.platforms:[];
+  function card(o){
+    const isSel=sel.includes(o.v);
+    const cid='c_platform_'+o.v.replace(/[^a-z0-9]/gi,'_');
+    const isLive=o.g==='live';
+    const desc=gDesc('platform',o.v,'d')??o.d;
+    const suit=gDesc('platform',o.v,'s')??o.s;
+    const note=gDesc('platform',o.v,'n')??o.n;
+    return `<div class="opt-card${isLive?' live':''}${isSel?' sel':''}" id="${cid}">
+      <div class="opt-top" onclick="selOpt('platform','${o.v.replace(/'/g,"\\'")}',true,event)">
+        <div class="opt-icon">${o.i}</div>
+        <div class="opt-info"><div class="opt-name">${esc(o.v)}</div><span class="opt-tag">${esc(o.t)}</span></div>
+        <div class="opt-actions">
+          <div class="chk">✓</div>
+          <button class="exp-btn" id="eb_${cid}" onclick="togExp('${cid}',event)">詳情</button>
+        </div>
+      </div>
+      <div class="exp-area" id="ea_${cid}">
+        <div class="inf-field">
+          <div class="inf-lbl">📖 說明</div>
+          <textarea class="edtf" rows="3" data-s="platform" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="d" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(desc)}</textarea>
+          <div class="edit-hint">點擊文字即可編輯，修改後自動儲存</div>
+        </div>
+        <div class="inf-field">
+          <div class="inf-lbl">🎯 適用場合</div>
+          <textarea class="edtf" rows="2" data-s="platform" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="s" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(suit)}</textarea>
+        </div>
+        <div class="inf-field">
+          <div class="inf-lbl">⚠️ 注意事項</div>
+          <textarea class="edtf" rows="2" data-s="platform" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="n" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(note)}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }
+  let h='';
+  h+=`<div class="grp-hdr"><div class="grp-hdr-line"></div><span class="grp-hdr-lbl video">🎦 視訊平台</span><div class="grp-hdr-line"></div></div>`;
+  h+=PLAT_VIDEO.map(card).join('');
+  h+=`<div class="grp-hdr"><div class="grp-hdr-line"></div><span class="grp-hdr-lbl live">📡 直播平台</span><div class="grp-hdr-line"></div></div>`;
+  h+=PLAT_LIVE.map(card).join('');
+  return h;
+}
+
+function buildOpts(s){
+  const sel=F[s.key];
+  return s.opts.map(o=>{
+    const isSel=sel===o.v;
+    const cid='c_'+s.id+'_'+o.v.replace(/[^a-z0-9]/gi,'_');
+    const desc=gDesc(s.id,o.v,'d')??o.d;
+    const suit=gDesc(s.id,o.v,'s')??o.s;
+    const note=gDesc(s.id,o.v,'n')??o.n;
+    return `<div class="opt-card${isSel?' sel':''}" id="${cid}">
+      <div class="opt-top" onclick="selOpt('${s.id}','${o.v.replace(/'/g,"\\'")}',false,event)">
+        <div class="opt-icon">${o.i}</div>
+        <div class="opt-info"><div class="opt-name">${esc(o.v)}</div><span class="opt-tag">${esc(o.t)}</span></div>
+        <div class="opt-actions">
+          <div class="chk">✓</div>
+          <button class="exp-btn" id="eb_${cid}" onclick="togExp('${cid}',event)">詳情</button>
+        </div>
+      </div>
+      <div class="exp-area" id="ea_${cid}">
+        <div class="inf-field">
+          <div class="inf-lbl">📖 說明</div>
+          <textarea class="edtf" rows="3" data-s="${s.id}" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="d" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(desc)}</textarea>
+          <div class="edit-hint">點擊文字即可編輯，修改後自動儲存</div>
+        </div>
+        <div class="inf-field">
+          <div class="inf-lbl">🎯 適用場合</div>
+          <textarea class="edtf" rows="2" data-s="${s.id}" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="s" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(suit)}</textarea>
+        </div>
+        <div class="inf-field">
+          <div class="inf-lbl">⚠️ 注意事項</div>
+          <textarea class="edtf" rows="2" data-s="${s.id}" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="n" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(note)}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildCamera(s){
+  let h=buildOpts(s);
+  if(F.camera==='多機攝影')h+=`<div class="sub-blk"><div class="sub-lbl">攝影機台數</div><div class="ctr-wrap"><button class="ctr-btn" onclick="chgCnt('cam',-1)">−</button><div class="ctr-val" id="cc">${F.cameraCount}</div><button class="ctr-btn" onclick="chgCnt('cam',1)">＋</button></div></div>`;
+  return h;
+}
+
+function buildCaption(s){
+  let h=buildOpts(s);
+  if(F.caption==='需要')h+=`<div class="sub-blk"><div class="sub-lbl">字卡數量（張）</div><div class="ctr-wrap"><button class="ctr-btn" onclick="chgCnt('cap',-1)">−</button><div class="ctr-val" id="cp">${F.captionCount}</div><button class="ctr-btn" onclick="chgCnt('cap',1)">＋</button></div></div>`;
+  return h;
+}
+
+function buildTiming(){
+  return `<div class="form-grp">
+    <label class="form-lbl">提供連結的日期與時間</label>
+    <input class="form-inp" type="datetime-local" id="flt" value="${F.linkTime}">
+    <div class="info-banner">⚠️ YouTube 直播頻道需提前 24-48 小時完成驗證，請提早確認</div>
+  </div>
+  <div class="form-grp">
+    <label class="form-lbl">補充說明</label>
+    <input class="form-inp" type="text" id="fln" placeholder="例：需在活動前 2 小時提供測試連結" value="${esc(F.linkNote)}">
+  </div>`;
+}
+
+function buildNotes(){
+  return `<div class="form-grp"><textarea class="form-inp" id="fn" rows="6" placeholder="其他特殊需求、注意事項、場地限制…" style="resize:vertical;min-height:140px">${esc(F.notes)}</textarea></div>`;
+}
+
+function buildDone(){
+  const msg=buildMsg();
+  return `<div class="done-hero"><div class="done-ico">✅</div><div class="done-ttl">需求確認完成！</div><div class="done-sub">以下是整理好的 LINE 訊息<br>可直接複製傳給廠商確認</div></div>
+  <div class="msg-bubble">${esc(msg)}</div>
+  <button class="btn-full" style="background:#00B900" onclick="cpyMsg()">📋 複製 LINE 訊息</button>
+  <button class="btn-full btn-mail" onclick="mailMsg()">✉️ 轉寄 Email 草稿</button>
+  <button class="btn-full btn-mail" onclick="createGmailDraft('client')">📨 建立客戶 Gmail 草稿</button>
+  <button class="btn-full btn-mail" onclick="createGmailDraft('vendor')">📮 建立廠商 Gmail 草稿</button>
+  <button class="btn-full btn-pdf" onclick="printPdf()">📄 產生 PDF 分享</button>
+  <button class="btn-full btn-share" onclick="shareMsg()">↗️ 系統分享</button>
+  <button class="btn-reset" onclick="resetAll()">重新填寫</button>`;
+}
+
+// ── EVENTS ────────────────────────────────────────────
+
+function bindStep(s){
+  document.querySelectorAll('.edtf').forEach(ta=>{
+    ag(ta);
+    ta.addEventListener('click',function(){this.removeAttribute('readonly');this.focus();});
+  });
+  if(s.type==='form'){
+    ['fd','fc','fp','fce','fve','fs','fv'].forEach(id=>{
+      document.getElementById(id)?.addEventListener('input',()=>{
+        F.date=document.getElementById('fd')?.value||F.date;
+        F.client=document.getElementById('fc')?.value||F.client;
+        F.phone=document.getElementById('fp')?.value||F.phone;
+        F.clientEmail=document.getElementById('fce')?.value||F.clientEmail;
+        F.vendorEmail=document.getElementById('fve')?.value||F.vendorEmail;
+        F.sales=document.getElementById('fs')?.value||F.sales;
+        F.venue=document.getElementById('fv')?.value||F.venue;
+      });
+    });
+  }
+  if(s.type==='timing'){
+    document.getElementById('flt')?.addEventListener('input',e=>F.linkTime=e.target.value);
+    document.getElementById('fln')?.addEventListener('input',e=>F.linkNote=e.target.value);
+  }
+  if(s.type==='notes')document.getElementById('fn')?.addEventListener('input',e=>F.notes=e.target.value);
+}
+
+function selOpt(sid,val,multi,ev){
+  ev&&ev.stopPropagation();
+  const s=SD.find(x=>x.id===sid);if(!s)return;
+  if(multi){
+    if(!Array.isArray(F[s.key]))F[s.key]=[];
+    const i=F[s.key].indexOf(val);
+    if(i===-1)F[s.key].push(val);else F[s.key].splice(i,1);
+    const cid='c_'+sid+'_'+val.replace(/[^a-z0-9]/gi,'_');
+    document.getElementById(cid)?.classList.toggle('sel',F[s.key].includes(val));
+  } else {
+    F[s.key]=val;
+    document.querySelectorAll('.opt-card').forEach(c=>c.classList.remove('sel'));
+    const cid='c_'+sid+'_'+val.replace(/[^a-z0-9]/gi,'_');
+    document.getElementById(cid)?.classList.add('sel');
+    if(sid==='camera'||sid==='caption')setTimeout(()=>render(),30);
+  }
+}
+
+function togExp(cid,ev){
+  if(ev)ev.stopPropagation();
+  const ea=document.getElementById('ea_'+cid);
+  const eb=document.getElementById('eb_'+cid);
+  if(!ea)return;
+  const open=ea.classList.toggle('open');
+  if(eb)eb.textContent=open?'收起':'詳情';
+}
+
+function ag(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+
+function svFld(el){
+  el.setAttribute('readonly','');
+  sDesc(el.dataset.s,el.dataset.v,el.dataset.f,el.value);
+}
+
+function chgCnt(t,d){
+  if(t==='cam'){F.cameraCount=Math.max(2,F.cameraCount+d);const e=document.getElementById('cc');if(e)e.textContent=F.cameraCount;}
+  else{F.captionCount=Math.max(1,F.captionCount+d);const e=document.getElementById('cp');if(e)e.textContent=F.captionCount;}
+}
+
+// ── NAV ───────────────────────────────────────────────
+
+function goNext(){
+  collectStep();
+  if(cur<SD.length-1){cur++;goBack=false;render();window.scrollTo(0,0);}
+}
+
+function goPrev(){
+  collectStep();
+  if(cur>0){cur--;goBack=true;render();window.scrollTo(0,0);}
+}
+
+function collectStep(){
+  const s=SD[cur];
+  if(!s)return;
+  if(s.type==='form'){
+    F.date=document.getElementById('fd')?.value||F.date;
+    F.client=document.getElementById('fc')?.value||F.client;
+    F.phone=document.getElementById('fp')?.value||F.phone;
+    F.clientEmail=document.getElementById('fce')?.value||F.clientEmail;
+    F.vendorEmail=document.getElementById('fve')?.value||F.vendorEmail;
+    F.sales=document.getElementById('fs')?.value||F.sales;
+    F.venue=document.getElementById('fv')?.value||F.venue;
+  }
+  if(s.type==='attendees'){const c=document.getElementById('att-custom');if(c&&c.value)F.attendeesCustom=c.value;}
+  if(s.type==='timing'){F.linkTime=document.getElementById('flt')?.value||F.linkTime;F.linkNote=document.getElementById('fln')?.value||F.linkNote;}
+  if(s.type==='notes')F.notes=document.getElementById('fn')?.value||F.notes;
+}
+
+// ── MESSAGE ───────────────────────────────────────────
+
+function buildMsg(){
+  const camStr=F.camera==='多機攝影'?`多機攝影（${F.cameraCount} 台）`:(F.camera||'—');
+  const capStr=F.caption==='需要'?`需要（${F.captionCount} 張）`:(F.caption||'—');
+  const platStr=Array.isArray(F.platforms)&&F.platforms.length?F.platforms.join('、'):'—';
+  const ltStr=F.linkTime?F.linkTime.replace('T',' '):'—';
+  const attStr=F.attendeesCustom?F.attendeesCustom+' 人':(F.attendees||'—');
+  let m='📋 視訊會議需求確認\n';
+  m+='━━━━━━━━━━━━━━━━\n';
+  m+=`📅 活動日期：${F.date||'—'}\n`;
+  m+=`🏢 客　　戶：${F.client||'—'}\n`;
+  m+=`📞 聯絡電話：${F.phone||'—'}\n`;
+  if(F.sales)m+=`👤 負責業務：${F.sales}\n`;
+  if(F.venue)m+=`📍 活動地點：${F.venue}\n`;
+  m+='━━━━━━━━━━━━━━━━\n';
+  m+=`🎥 會議型式：${F.meetingType||'—'}\n`;
+  m+=`👥 遠端人數：${attStr}\n`;
+  m+=`💻 使用平台：${platStr}\n`;
+  m+='━━━━━━━━━━━━━━━━\n';
+  m+=`📸 攝影配置：${camStr}\n`;
+  m+=`🎞️ 錄影需求：${F.recording||'—'}\n`;
+  m+=`📊 接入 PPT：${F.ppt||'—'}\n`;
+  m+=`🪧 字卡需求：${capStr}\n`;
+  m+='━━━━━━━━━━━━━━━━\n';
+  m+=`🔗 連結時間：${ltStr}\n`;
+  if(F.linkNote)m+=`   補　　充：${F.linkNote}\n`;
+  m+=`🎬 付費彩排：${F.rehearsal||'—'}\n`;
+  m+=`🌐 口譯需求：${F.interpret||'—'}\n`;
+  if(F.notes){m+='━━━━━━━━━━━━━━━━\n';m+=`📝 備　　註：${F.notes}\n`;}
+  m+='━━━━━━━━━━━━━━━━\n';
+  m+='（以上需求請確認，謝謝）';
+  return m;
+}
+
+function cpyMsg(){
+  const msg=buildMsg();
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(msg).then(toast);}
+  else{const ta=document.createElement('textarea');ta.value=msg;Object.assign(ta.style,{position:'fixed',opacity:'0'});document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast();}
+}
+
+function toast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+function mailMsg(){
+  collectStep();
+  const subject=`視訊會議需求確認${F.client?' - '+F.client:''}${F.date?' - '+F.date:''}`;
+  const body=buildMsg();
+  const url=`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href=url;
+}
+
+function printPdf(){
+  collectStep();
+  const title=`視訊會議需求確認${F.client?' - '+F.client:''}`;
+  const msg=buildMsg();
+  const html=`<!doctype html><html lang="zh-TW"><head><meta charset="UTF-8"><title>${esc(title)}</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;color:#111827;margin:32px;line-height:1.7}
+    h1{font-size:22px;margin:0 0 6px;color:#085041}
+    .meta{font-size:12px;color:#6B7280;margin-bottom:18px}
+    pre{white-space:pre-wrap;font-family:inherit;font-size:13px;border:1px solid #E5E7EB;border-radius:12px;padding:18px;background:#F9FAFB}
+    @page{margin:18mm}
+  </style></head><body><h1>${esc(title)}</h1><div class="meta">產生時間：${new Date().toLocaleString('zh-TW')}</div><pre>${esc(msg)}</pre></body></html>`;
+  const w=window.open('','_blank');
+  if(!w){toastText('請允許彈出視窗後再產生 PDF');return;}
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(),250);
+}
+
+async function shareMsg(){
+  collectStep();
+  const title=`視訊會議需求確認${F.client?' - '+F.client:''}`;
+  const text=buildMsg();
+  if(navigator.share){
+    try{await navigator.share({title,text});return;}
+    catch(e){if(e.name==='AbortError')return;}
+  }
+  cpyMsg();
+  toastText('已複製，可貼到 Email、LINE 或其他 App');
+}
+
+function draftPayload(type){
+  const payload=currentPayload();
+  const isClient=type==='client';
+  const to=isClient?F.clientEmail:F.vendorEmail;
+  const subject=isClient
+    ? `視訊會議需求確認${F.client?' - '+F.client:''}${F.date?' - '+F.date:''}`
+    : `廠商協助報價｜視訊會議需求${F.client?' - '+F.client:''}${F.date?' - '+F.date:''}`;
+  const greeting=isClient
+    ? `${F.client||'您好'}，以下先跟您確認本次視訊會議需求：`
+    : `您好，想詢問以下視訊會議／直播案是否可支援並協助報價：`;
+  return {
+    ...payload,
+    action:'draft',
+    draftType:type,
+    to,
+    subject,
+    body:`${greeting}\n\n${payload.message}\n\n謝謝。`
+  };
+}
+
+async function createGmailDraft(type){
+  saveSyncSettings();
+  if(!syncSettings.url){openSync();syncNote('請先貼上 Apps Script Web App 網址，才能建立 Gmail 草稿。');return;}
+  collectStep();
+  const email=type==='client'?F.clientEmail:F.vendorEmail;
+  if(!email){alert(type==='client'?'請先填寫客戶 Email。':'請先填寫廠商 Email。');cur=0;goBack=true;render();window.scrollTo(0,0);return;}
+  const payload=draftPayload(type);
+  try{
+    await fetch(syncSettings.url,{method:'POST',body:JSON.stringify(payload)});
+    toastText(type==='client'?'✅ 已建立客戶 Gmail 草稿':'✅ 已建立廠商 Gmail 草稿');
+  }catch{
+    try{
+      await fetch(syncSettings.url,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+      toastText(type==='client'?'✅ 已送出建立客戶草稿':'✅ 已送出建立廠商草稿');
+    }catch{
+      alert('建立 Gmail 草稿失敗，請確認 Apps Script 已重新部署並授權 Gmail。');
+    }
+  }
+}
+
+function resetAll(){
+  if(!confirm('確定要清空所有填寫內容嗎？'))return;
+  Object.assign(F,{date:'',client:'',phone:'',clientEmail:'',vendorEmail:'',sales:'',venue:'',meetingType:null,attendees:null,attendeesCustom:'',platforms:[],camera:null,cameraCount:2,recording:null,ppt:null,caption:null,captionCount:1,linkTime:'',linkNote:'',rehearsal:null,interpret:null,notes:''});
+  caseId='';localStorage.removeItem('vc_demo_case_id');
+  cur=0;goBack=false;render();
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── GOOGLE SHEETS SYNC ───────────────────────────────
+
+function loadSyncSettings(){
+  try{return JSON.parse(localStorage.getItem(SYNC_KEY))||{url:''};}
+  catch{return{url:''};}
+}
+
+function openSync(){
+  collectStep();
+  document.getElementById('sync-url').value=syncSettings.url||'';
+  document.getElementById('sync-bd').classList.add('show');
+  document.getElementById('sync-sh').classList.add('show');
+  syncNote(syncSettings.url?(caseId?'已設定同步，這筆案件可更新同一列。':'已設定同步，可儲存新案件。'):'尚未設定 Apps Script Web App 網址。');
+}
+
+function closeSync(){
+  document.getElementById('sync-bd').classList.remove('show');
+  document.getElementById('sync-sh').classList.remove('show');
+}
+
+function syncNote(txt){document.getElementById('sync-status').textContent=txt;}
+
+function saveSyncSettings(){
+  const input=document.getElementById('sync-url');
+  const panel=document.getElementById('sync-sh');
+  const typed=input.value.trim();
+  if(typed||panel.classList.contains('show'))syncSettings.url=typed;
+  localStorage.setItem(SYNC_KEY,JSON.stringify(syncSettings));
+  syncNote(syncSettings.url?'同步設定已儲存。':'已清空同步網址。');
+}
+
+function resetSyncSettings(){
+  syncSettings={url:''};
+  localStorage.removeItem(SYNC_KEY);
+  document.getElementById('sync-url').value='';
+  syncNote('已清除同步設定。');
+}
+
+async function copyBackendCode(){
+  try{await navigator.clipboard.writeText(APPS_SCRIPT_CODE);syncNote('後端程式碼已複製，請貼到 Google Apps Script。');toastText('✅ 後端程式碼已複製');}
+  catch{syncNote('複製失敗，請使用同資料夾的 demo-google-apps-script.gs。');}
+}
+
+function makeCaseId(){
+  const d=new Date();
+  const stamp=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  return 'VC-'+stamp+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+}
+
+function currentPayload(){
+  collectStep();
+  if(!caseId){caseId=makeCaseId();localStorage.setItem('vc_demo_case_id',caseId);}
+  return {caseId,form:JSON.parse(JSON.stringify(F)),message:buildMsg(),savedAt:new Date().toISOString()};
+}
+
+async function saveCaseToSheet(){
+  saveSyncSettings();
+  if(!syncSettings.url){syncNote('請先貼上 Apps Script Web App 網址。');return;}
+  const payload=currentPayload();
+  try{
+    await fetch(syncSettings.url,{method:'POST',body:JSON.stringify(payload)});
+    syncNote('已送出儲存：'+payload.caseId);
+    toastText('✅ 已儲存案件');
+  }catch{
+    try{
+      await fetch(syncSettings.url,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+      syncNote('已送出儲存：'+payload.caseId);
+      toastText('✅ 已送出案件');
+    }catch{
+      syncNote('儲存失敗，請確認 Web App 網址與部署權限。');
+    }
+  }
+}
+
+function jsonp(action,params={}){
+  if(!syncSettings.url)return Promise.reject(new Error('missing url'));
+  return new Promise((resolve,reject)=>{
+    const cb='syncCb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const s=document.createElement('script');
+    const u=new URL(syncSettings.url);
+    u.searchParams.set('action',action);
+    u.searchParams.set('callback',cb);
+    Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
+    window[cb]=data=>{delete window[cb];s.remove();resolve(data);};
+    s.onerror=()=>{delete window[cb];s.remove();reject(new Error('load failed'));};
+    s.src=u.toString();
+    document.body.appendChild(s);
+  });
+}
+
+async function loadCaseList(){
+  saveSyncSettings();
+  if(!syncSettings.url){syncNote('請先貼上 Apps Script Web App 網址。');return;}
+  try{
+    const res=await jsonp('list');
+    const cases=res.cases||[];
+    const sel=document.getElementById('case-list');
+    sel.innerHTML=cases.length?cases.map(c=>{
+      const label=[c.date,c.client,c.meetingType].filter(Boolean).join('｜')||c.caseId;
+      return `<option value="${esc(c.caseId)}">${esc(label)}</option>`;
+    }).join(''):'<option value="">尚無案件</option>';
+    syncNote('已讀取 '+cases.length+' 筆最近案件。');
+  }catch{syncNote('讀取失敗，請確認 Web App 存取權限是「知道連結的任何人」。');}
+}
+
+async function loadSelectedCase(){
+  const id=document.getElementById('case-list').value;
+  if(!id){syncNote('請先選擇案件。');return;}
+  try{
+    const res=await jsonp('load',{caseId:id});
+    if(!res.ok){syncNote(res.error||'讀取案件失敗。');return;}
+    caseId=res.case.caseId||id;
+    localStorage.setItem('vc_demo_case_id',caseId);
+    Object.assign(F,res.case.form||{});
+    cur=0;goBack=false;closeSync();render();window.scrollTo(0,0);
+    toastText('✅ 已載入案件');
+  }catch{syncNote('載入案件失敗。');}
+}
+
+function downloadCaseFile(){
+  const payload=currentPayload();
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=payload.caseId+'-'+(F.client||'視訊會議需求')+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+document.getElementById('case-file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{
+    const data=JSON.parse(await file.text());
+    caseId=data.caseId||makeCaseId();
+    localStorage.setItem('vc_demo_case_id',caseId);
+    Object.assign(F,data.form||{});
+    cur=0;goBack=false;closeSync();render();window.scrollTo(0,0);
+    toastText('✅ 已匯入案件');
+  }catch{syncNote('匯入失敗，請確認是此工具下載的 JSON 檔。');}
+  e.target.value='';
+});
+
+function toastText(txt){
+  const t=document.getElementById('toast');
+  t.textContent=txt;
+  t.classList.add('show');
+  setTimeout(()=>{t.classList.remove('show');t.textContent='✅ 已複製到剪貼簿';},2500);
+}
+
+document.getElementById('sync-url').value=syncSettings.url||'';
+render();
+</script>
+</body>
+</html>
