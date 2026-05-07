@@ -168,8 +168,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
     <button class="sync-close" onclick="closeSync()">關閉</button>
   </div>
   <div class="form-grp">
-    <label class="form-lbl">Apps Script Web App 網址</label>
-    <input class="form-inp" id="sync-url" placeholder="https://script.google.com/macros/s/...">
+    <label class="form-lbl">同步代碼或 Apps Script 網址</label>
+    <input class="form-inp" id="sync-url" placeholder="貼 AKfy... 代碼，或完整 /exec 網址">
   </div>
   <div class="sync-grid">
     <button class="sync-btn primary" onclick="saveSyncSettings()">儲存設定</button>
@@ -188,7 +188,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
     <button class="sync-btn" onclick="resetSyncSettings()">清除同步設定</button>
   </div>
   <input class="sync-file" id="case-file" type="file" accept="application/json,.json">
-  <div class="sync-status" id="sync-status">第一次使用：把後端程式碼貼到 Google Sheets 的 Apps Script，部署成 Web App，再把網址貼回這裡。</div>
+  <div class="sync-status" id="sync-status">第一次使用：把後端程式碼貼到 Google Sheets 的 Apps Script，部署成 Web App。手機可貼完整網址，或只貼 /s/ 和 /exec 中間那段 AKfy... 同步代碼。</div>
 </div>
 
 <div class="toast" id="toast">✅ 已複製到剪貼簿</div>
@@ -872,7 +872,7 @@ function loadSyncSettings(){
 
 function openSync(){
   collectStep();
-  document.getElementById('sync-url').value=syncSettings.url||'';
+  document.getElementById('sync-url').value=syncCodeFromUrl(syncSettings.url)||'';
   document.getElementById('sync-bd').classList.add('show');
   document.getElementById('sync-sh').classList.add('show');
   syncNote(syncSettings.url?(caseId?'已設定同步，這筆案件可更新同一列。':'已設定同步，可儲存新案件。'):'尚未設定 Apps Script Web App 網址。');
@@ -885,13 +885,28 @@ function closeSync(){
 
 function syncNote(txt){document.getElementById('sync-status').textContent=txt;}
 
+function normalizeSyncUrl(raw){
+  const value=(raw||'').trim();
+  if(!value)return '';
+  const match=value.match(/\/macros\/s\/([^/]+)\/exec/);
+  if(match)return `https://script.google.com/macros/s/${match[1]}/exec`;
+  if(value.startsWith('AKfy'))return `https://script.google.com/macros/s/${value}/exec`;
+  return value;
+}
+
+function syncCodeFromUrl(url){
+  const match=(url||'').match(/\/macros\/s\/([^/]+)\/exec/);
+  return match?match[1]:(url||'');
+}
+
 function saveSyncSettings(){
   const input=document.getElementById('sync-url');
   const panel=document.getElementById('sync-sh');
-  const typed=input.value.trim();
+  const typed=normalizeSyncUrl(input.value);
   if(typed||panel.classList.contains('show'))syncSettings.url=typed;
   localStorage.setItem(SYNC_KEY,JSON.stringify(syncSettings));
-  syncNote(syncSettings.url?'同步設定已儲存。':'已清空同步網址。');
+  input.value=syncCodeFromUrl(syncSettings.url);
+  syncNote(syncSettings.url?'同步設定已儲存。下次可只輸入這段 AKfy... 同步代碼。':'已清空同步網址。');
 }
 
 function resetSyncSettings(){
@@ -1012,7 +1027,7 @@ function toastText(txt){
   setTimeout(()=>{t.classList.remove('show');t.textContent='✅ 已複製到剪貼簿';},2500);
 }
 
-document.getElementById('sync-url').value=syncSettings.url||'';
+document.getElementById('sync-url').value=syncCodeFromUrl(syncSettings.url)||'';
 render();
 </script>
 </body>
