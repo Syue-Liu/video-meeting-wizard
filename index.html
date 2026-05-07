@@ -131,6 +131,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .slide-bk{animation:sbk .28s ease}
 @keyframes sfwd{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
 @keyframes sbk{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:430px){
+  body{max-width:none}
+  .wrap{padding:14px 12px 112px}
+  .hdr,.nav-bar{max-width:none}
+  .form-row{grid-template-columns:1fr;gap:0}
+  .form-inp,.att-input{font-size:16px;min-width:0}
+  .sync-sheet{width:calc(100% - 16px);bottom:8px;padding:14px;border-radius:16px}
+  .sync-grid{grid-template-columns:1fr}
+  .sync-btn,.btn-full,.btn-reset{min-height:48px}
+  .nav-bar{padding:10px 12px 14px}
+  .btn-back{padding:13px 14px}
+  .opt-top{align-items:flex-start}
+  .opt-actions{gap:5px}
+  .exp-btn{width:34px}
+}
 @media print{
   body{max-width:none;background:#fff}
   .hdr,.nav-bar,.sync-backdrop,.sync-sheet,.toast,.btn-full,.btn-reset{display:none!important}
@@ -335,7 +350,7 @@ const SD = [
 
 let cur=0,goBack=false;
 const F={
-  date:'',client:'',phone:'',clientEmail:'',vendorEmail:'',sales:'',venue:'',
+  date:'',client:'',phone:'',clientEmail:'',sales:'',venue:'',
   meetingType:null,attendees:null,attendeesCustom:'',
   platforms:[],camera:null,cameraCount:2,recording:null,
   ppt:null,caption:null,captionCount:1,
@@ -350,7 +365,7 @@ let syncSettings=loadSyncSettings();
 
 const APPS_SCRIPT_CODE=`const SHEET_NAME = '案件資料';
 const HEADERS = [
-  '案件ID','更新時間','活動日期','客戶名稱','聯絡電話','客戶Email','廠商Email','負責業務','會議廳／地點',
+  '案件ID','更新時間','活動日期','客戶名稱','聯絡電話','客戶Email','負責業務','會議廳／地點',
   '會議型式','遠端人數','使用平台','攝影配置','錄影需求','接入PPT','字卡需求',
   '連結時間','付費彩排','口譯需求','備註','LINE訊息','完整資料JSON'
 ];
@@ -391,7 +406,7 @@ function toRow_(p) {
   const caption = f.caption === '需要' ? '需要（' + f.captionCount + ' 張）' : (f.caption || '');
   return [
     p.caseId || Utilities.getUuid(), new Date(), f.date || '', f.client || '', f.phone || '',
-    f.clientEmail || '', f.vendorEmail || '', f.sales || '', f.venue || '', f.meetingType || '', attendees, (f.platforms || []).join('、'),
+    f.clientEmail || '', f.sales || '', f.venue || '', f.meetingType || '', attendees, (f.platforms || []).join('、'),
     camera, f.recording || '', f.ppt || '', caption, f.linkTime || '', f.rehearsal || '',
     f.interpret || '', f.notes || '', p.message || '', JSON.stringify(p)
   ];
@@ -413,7 +428,7 @@ function listCases_() {
   const start = Math.max(2, last - 39);
   const values = sheet.getRange(start, 1, last - start + 1, HEADERS.length).getValues().reverse();
   const cases = values.map(function(row) {
-    return { caseId: row[0], updatedAt: row[1], date: row[2], client: row[3], meetingType: row[9] };
+    return { caseId: row[0], updatedAt: row[1], date: row[2], client: row[3], meetingType: row[8] || row[9] };
   });
   return { ok: true, cases: cases };
 }
@@ -424,7 +439,7 @@ function loadCase_(id) {
   if (last < 2) return { ok: false, error: '尚無案件' };
   const values = sheet.getRange(2, 1, last - 1, HEADERS.length).getValues();
   for (var i = 0; i < values.length; i++) {
-    if (values[i][0] === id) return { ok: true, case: JSON.parse(values[i][21] || '{}') };
+    if (values[i][0] === id) return { ok: true, case: JSON.parse(values[i][20] || values[i][21] || '{}') };
   }
   return { ok: false, error: '找不到案件' };
 }
@@ -479,10 +494,7 @@ function buildForm(){
     <div class="form-grp"><label class="form-lbl req">聯絡電話</label><input class="form-inp" type="tel" id="fp" placeholder="09xx-xxx-xxx" value="${esc(F.phone)}"></div>
     <div class="form-grp"><label class="form-lbl">負責業務</label><input class="form-inp" type="text" id="fs" placeholder="業務姓名" value="${esc(F.sales)}"></div>
   </div>
-  <div class="form-row">
-    <div class="form-grp"><label class="form-lbl">客戶 Email</label><input class="form-inp" type="email" id="fce" placeholder="client@example.com" value="${esc(F.clientEmail)}"></div>
-    <div class="form-grp"><label class="form-lbl">廠商 Email</label><input class="form-inp" type="email" id="fve" placeholder="vendor@example.com" value="${esc(F.vendorEmail)}"></div>
-  </div>
+  <div class="form-grp"><label class="form-lbl">客戶 Email</label><input class="form-inp" type="email" id="fce" placeholder="client@example.com" value="${esc(F.clientEmail)}"></div>
   <div class="form-grp"><label class="form-lbl">會議廳／地點</label><input class="form-inp" type="text" id="fv" placeholder="場地名稱或地址" value="${esc(F.venue)}"></div>`;
 }
 
@@ -632,7 +644,6 @@ function buildDone(){
   <button class="btn-full" style="background:#00B900" onclick="cpyMsg()">📋 複製 LINE 訊息</button>
   <button class="btn-full btn-mail" onclick="mailMsg()">✉️ 轉寄 Email 草稿</button>
   <button class="btn-full btn-mail" onclick="createGmailDraft('client')">📨 建立客戶 Gmail 草稿</button>
-  <button class="btn-full btn-mail" onclick="createGmailDraft('vendor')">📮 建立廠商 Gmail 草稿</button>
   <button class="btn-full btn-pdf" onclick="printPdf()">📄 產生 PDF 分享</button>
   <button class="btn-full btn-share" onclick="shareMsg()">↗️ 系統分享</button>
   <button class="btn-reset" onclick="resetAll()">重新填寫</button>`;
@@ -646,13 +657,12 @@ function bindStep(s){
     ta.addEventListener('click',function(){this.removeAttribute('readonly');this.focus();});
   });
   if(s.type==='form'){
-    ['fd','fc','fp','fce','fve','fs','fv'].forEach(id=>{
+    ['fd','fc','fp','fce','fs','fv'].forEach(id=>{
       document.getElementById(id)?.addEventListener('input',()=>{
         F.date=document.getElementById('fd')?.value||F.date;
         F.client=document.getElementById('fc')?.value||F.client;
         F.phone=document.getElementById('fp')?.value||F.phone;
         F.clientEmail=document.getElementById('fce')?.value||F.clientEmail;
-        F.vendorEmail=document.getElementById('fve')?.value||F.vendorEmail;
         F.sales=document.getElementById('fs')?.value||F.sales;
         F.venue=document.getElementById('fv')?.value||F.venue;
       });
@@ -724,7 +734,6 @@ function collectStep(){
     F.client=document.getElementById('fc')?.value||F.client;
     F.phone=document.getElementById('fp')?.value||F.phone;
     F.clientEmail=document.getElementById('fce')?.value||F.clientEmail;
-    F.vendorEmail=document.getElementById('fve')?.value||F.vendorEmail;
     F.sales=document.getElementById('fs')?.value||F.sales;
     F.venue=document.getElementById('fv')?.value||F.venue;
   }
@@ -820,7 +829,7 @@ async function shareMsg(){
 function draftPayload(type){
   const payload=currentPayload();
   const isClient=type==='client';
-  const to=isClient?F.clientEmail:F.vendorEmail;
+  const to=F.clientEmail;
   const subject=isClient
     ? `視訊會議需求確認${F.client?' - '+F.client:''}${F.date?' - '+F.date:''}`
     : `廠商協助報價｜視訊會議需求${F.client?' - '+F.client:''}${F.date?' - '+F.date:''}`;
@@ -841,16 +850,16 @@ async function createGmailDraft(type){
   saveSyncSettings();
   if(!syncSettings.url){openSync();syncNote('請先貼上 Apps Script Web App 網址，才能建立 Gmail 草稿。');return;}
   collectStep();
-  const email=type==='client'?F.clientEmail:F.vendorEmail;
-  if(!email){alert(type==='client'?'請先填寫客戶 Email。':'請先填寫廠商 Email。');cur=0;goBack=true;render();window.scrollTo(0,0);return;}
+  const email=F.clientEmail;
+  if(!email){alert('請先填寫客戶 Email。');cur=0;goBack=true;render();window.scrollTo(0,0);return;}
   const payload=draftPayload(type);
   try{
     await fetch(syncSettings.url,{method:'POST',body:JSON.stringify(payload)});
-    toastText(type==='client'?'✅ 已建立客戶 Gmail 草稿':'✅ 已建立廠商 Gmail 草稿');
+    toastText('✅ 已建立客戶 Gmail 草稿');
   }catch{
     try{
       await fetch(syncSettings.url,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
-      toastText(type==='client'?'✅ 已送出建立客戶草稿':'✅ 已送出建立廠商草稿');
+      toastText('✅ 已送出建立客戶草稿');
     }catch{
       alert('建立 Gmail 草稿失敗，請確認 Apps Script 已重新部署並授權 Gmail。');
     }
@@ -859,7 +868,7 @@ async function createGmailDraft(type){
 
 function resetAll(){
   if(!confirm('確定要清空所有填寫內容嗎？'))return;
-  Object.assign(F,{date:'',client:'',phone:'',clientEmail:'',vendorEmail:'',sales:'',venue:'',meetingType:null,attendees:null,attendeesCustom:'',platforms:[],camera:null,cameraCount:2,recording:null,ppt:null,caption:null,captionCount:1,linkTime:'',linkNote:'',rehearsal:null,interpret:null,notes:''});
+  Object.assign(F,{date:'',client:'',phone:'',clientEmail:'',sales:'',venue:'',meetingType:null,attendees:null,attendeesCustom:'',platforms:[],camera:null,cameraCount:2,recording:null,ppt:null,caption:null,captionCount:1,linkTime:'',linkNote:'',rehearsal:null,interpret:null,notes:''});
   caseId='';localStorage.removeItem('vc_demo_case_id');
   cur=0;goBack=false;render();
 }

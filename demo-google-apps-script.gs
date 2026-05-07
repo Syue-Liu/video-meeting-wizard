@@ -1,6 +1,6 @@
 const SHEET_NAME = '案件資料';
 const HEADERS = [
-  '案件ID','更新時間','活動日期','客戶名稱','聯絡電話','客戶Email','廠商Email','負責業務','會議廳／地點',
+  '案件ID','更新時間','活動日期','客戶名稱','聯絡電話','客戶Email','負責業務','會議廳／地點',
   '會議型式','遠端人數','使用平台','攝影配置','錄影需求','接入PPT','字卡需求',
   '連結時間','付費彩排','口譯需求','備註','LINE訊息','完整資料JSON'
 ];
@@ -41,7 +41,7 @@ function toRow_(p) {
   const caption = f.caption === '需要' ? '需要（' + f.captionCount + ' 張）' : (f.caption || '');
   return [
     p.caseId || Utilities.getUuid(), new Date(), f.date || '', f.client || '', f.phone || '',
-    f.clientEmail || '', f.vendorEmail || '', f.sales || '', f.venue || '', f.meetingType || '', attendees, (f.platforms || []).join('、'),
+    f.clientEmail || '', f.sales || '', f.venue || '', f.meetingType || '', attendees, (f.platforms || []).join('、'),
     camera, f.recording || '', f.ppt || '', caption, f.linkTime || '', f.rehearsal || '',
     f.interpret || '', f.notes || '', p.message || '', JSON.stringify(p)
   ];
@@ -63,7 +63,7 @@ function listCases_() {
   const start = Math.max(2, last - 39);
   const values = sheet.getRange(start, 1, last - start + 1, HEADERS.length).getValues().reverse();
   const cases = values.map(function(row) {
-    return { caseId: row[0], updatedAt: row[1], date: row[2], client: row[3], meetingType: row[9] };
+    return { caseId: row[0], updatedAt: row[1], date: row[2], client: row[3], meetingType: row[8] || row[9] };
   });
   return { ok: true, cases: cases };
 }
@@ -74,7 +74,7 @@ function loadCase_(id) {
   if (last < 2) return { ok: false, error: '尚無案件' };
   const values = sheet.getRange(2, 1, last - 1, HEADERS.length).getValues();
   for (var i = 0; i < values.length; i++) {
-    if (values[i][0] === id) return { ok: true, case: JSON.parse(values[i][21] || '{}') };
+    if (values[i][0] === id) return { ok: true, case: JSON.parse(values[i][20] || values[i][21] || '{}') };
   }
   return { ok: false, error: '找不到案件' };
 }
