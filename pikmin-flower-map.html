@@ -13,13 +13,40 @@
           <p class="kicker">Pikmin Bloom 輔助筆記</p>
           <h1>巨大花朵採果地圖</h1>
           <div class="top-actions">
-            <button id="locateButton" class="icon-button" type="button" title="更新目前位置">定位我</button>
+            <button id="locateButton" class="icon-button" type="button" title="更新目前位置">定位</button>
             <button id="menuButton" class="icon-button menu-button" type="button" title="開啟設定">選單</button>
             <button id="exportButton" class="icon-button" type="button" title="匯出資料">匯出</button>
           </div>
         </div>
-        <img src="./assets/pikmin-route-hero-mobile.jpg" alt="" />
+        <img src="./assets/pikmin-route-hero-v2.jpg" alt="" />
       </header>
+
+      <section class="status-strip" aria-label="目前採果狀態">
+        <div>
+          <span>可採</span>
+          <strong id="readyCount">0</strong>
+        </div>
+        <div>
+          <span>快結束</span>
+          <strong id="urgentCount">0</strong>
+        </div>
+        <div>
+          <span>來得及</span>
+          <strong id="reachableCount">待定位</strong>
+        </div>
+        <div>
+          <span>最近</span>
+          <strong id="nearestLabel">尚無花點</strong>
+        </div>
+        <div>
+          <span>距離</span>
+          <strong id="nearestDistance">待定位</strong>
+        </div>
+        <div class="total-stat">
+          <span>總數</span>
+          <strong id="totalCount">0</strong>
+        </div>
+      </section>
 
       <section class="map-panel primary-map">
         <div class="map-toolbar">
@@ -66,35 +93,6 @@
             </div>
           </div>
           <div id="flowerList" class="flower-list"></div>
-        </details>
-
-        <details class="tool-card stats-panel">
-          <summary>
-            <span>統計</span>
-            <strong id="nearestLabel">尚無花點</strong>
-          </summary>
-          <section class="status-grid" aria-label="目前採果狀態">
-            <div>
-              <span>總花點</span>
-              <strong id="totalCount">0</strong>
-            </div>
-            <div>
-              <span>可採</span>
-              <strong id="readyCount">0</strong>
-            </div>
-            <div>
-              <span>快結束</span>
-              <strong id="urgentCount">0</strong>
-            </div>
-            <div>
-              <span>來得及</span>
-              <strong id="reachableCount">待定位</strong>
-            </div>
-            <div>
-              <span>最近距離</span>
-              <strong id="nearestDistance">待定位</strong>
-            </div>
-          </section>
         </details>
 
         <details class="tool-card input-panel" aria-label="新增巨大花朵">
@@ -196,7 +194,6 @@
       </article>
     </template>
 
-    <script src="./pikmin-flower-map.js"></script>
     <div id="menuBackdrop" class="menu-backdrop" hidden></div>
     <aside id="menuDrawer" class="menu-drawer" aria-label="設定選單" hidden>
       <div class="menu-head">
@@ -228,5 +225,6 @@
         <p id="syncHint" class="hint">朋友們使用同一個同步網址，就會看到同一批巨大花朵。</p>
       </section>
     </aside>
+    <script src="./pikmin-flower-map.js"></script>
   </body>
 </html>

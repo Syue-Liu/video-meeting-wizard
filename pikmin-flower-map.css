@@ -43,6 +43,7 @@ a.map-link {
   cursor: pointer;
   font-weight: 800;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 button:disabled {
@@ -163,14 +164,14 @@ h3 {
   padding: 7px 10px;
 }
 
-.status-grid {
+.status-strip {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0 0 14px;
+  grid-template-columns: 0.65fr 0.65fr 0.75fr minmax(0, 1.35fr) 0.75fr 0.55fr;
+  gap: 6px;
+  margin: 0 0 8px;
 }
 
-.status-grid div,
+.status-strip div,
 .tool-card,
 .map-panel {
   border: 1px solid var(--line);
@@ -179,23 +180,23 @@ h3 {
   box-shadow: var(--shadow);
 }
 
-.status-grid div {
+.status-strip div {
   min-width: 0;
-  padding: 13px;
+  padding: 8px 9px;
 }
 
-.status-grid span {
+.status-strip span {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
 }
 
-.status-grid strong {
+.status-strip strong {
   display: block;
   overflow: hidden;
   color: #26343b;
-  font-size: 20px;
+  font-size: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -665,44 +666,47 @@ select:focus {
   }
 
   .hero-panel {
-    grid-template-columns: minmax(0, 1fr) 112px;
+    grid-template-columns: 1fr;
     gap: 0;
   }
 
   .hero-copy {
-    padding: 14px 12px;
+    padding: 16px 14px 10px;
   }
 
   .hero-panel img {
-    height: 130px;
-    order: initial;
-    padding: 6px;
+    height: 190px;
+    order: -1;
+    padding: 8px 10px 0;
   }
 
-  .status-grid,
   .form-grid,
   .sync-grid {
     grid-template-columns: 1fr;
   }
 
-  .status-grid {
+  .status-strip {
     display: flex;
     overflow-x: auto;
-    padding: 2px 2px 10px;
+    padding: 1px 1px 8px;
     scroll-snap-type: x mandatory;
   }
 
-  .status-grid div {
-    flex: 0 0 142px;
+  .status-strip div {
+    flex: 0 0 96px;
     scroll-snap-align: start;
   }
 
-  .status-grid strong {
-    font-size: 18px;
+  .status-strip div:nth-child(4) {
+    flex-basis: 150px;
+  }
+
+  .status-strip strong {
+    font-size: 14px;
   }
 
   .map-canvas {
-    min-height: 56vh;
+    min-height: min(52vh, 430px);
   }
 
   .route-panel {
@@ -742,12 +746,19 @@ select:focus {
   }
 
   .hero-panel img {
-    height: 118px;
+    height: 180px;
   }
 
   .top-actions {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .top-actions .icon-button {
+    padding: 10px 8px;
+    min-width: 0;
+    font-size: 15px;
   }
 
   .menu-button::before {
