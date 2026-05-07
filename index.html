@@ -27,7 +27,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .step-q p{font-size:13px;color:var(--muted);line-height:1.5}
 
 /* option cards – VIDEO (teal) */
-.opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.opt-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;transition:border-color .2s}
 .opt-card.sel{border-color:var(--teal);background:#f7fdfb}
 .opt-top{padding:13px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .opt-icon{width:42px;height:42px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
@@ -39,22 +39,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .chk{width:22px;height:22px;border-radius:11px;border:2px solid var(--border);transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:transparent;font-size:12px}
 .opt-card.sel .chk{background:var(--teal);border-color:var(--teal);color:#fff}
 .exp-btn{width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:10px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
-.exp-area{display:none;border-top:1px solid var(--border)}
-.exp-area.open{display:block}
-.inf-field{padding:11px 14px;border-bottom:1px solid #f0f0f0}
-.inf-field:last-child{border-bottom:none}
-.inf-lbl{font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.edtf{width:100%;font-family:inherit;font-size:13px;color:var(--text);line-height:1.65;border:none;background:transparent;resize:none;outline:none;padding:0;cursor:pointer;overflow:hidden;min-height:36px}
-.edtf:focus{cursor:text;background:#f0faf6;border:1.5px solid var(--accent);border-radius:8px;padding:8px}
-.edit-hint{font-size:10px;color:var(--accent);margin-top:4px;opacity:.8}
+/* ── Detail bottom sheet ── */
+.det-bd{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:300;display:none;-webkit-tap-highlight-color:transparent}
+.det-bd.show{display:block}
+.det-sh{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;max-height:88vh;background:#fff;border-radius:20px 20px 0 0;z-index:310;display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.32,.72,0,1)}
+.det-sh.show{transform:translateX(-50%) translateY(0)}
+.det-hdr{padding:14px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.det-drag{width:36px;height:4px;background:#d1d5db;border-radius:2px;margin:0 auto 12px}
+.det-hdr-row{display:flex;align-items:center;gap:10px}
+.det-ico{width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.det-hdr.live .det-ico{background:var(--live-light)}
+.det-hdr.live .det-tag{color:var(--live);background:var(--live-light)}
+.det-hdr.live .det-lbl{color:var(--live)}
+.det-ttl{font-size:16px;font-weight:700;line-height:1.2}
+.det-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:8px;background:var(--teal-light);color:var(--teal);display:inline-block;margin-top:3px}
+.det-close{margin-left:auto;width:32px;height:32px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.det-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 env(safe-area-inset-bottom,0)}
+.det-sec{padding:14px 16px;border-bottom:1px solid #f3f4f6}
+.det-sec:last-child{border-bottom:none;padding-bottom:24px}
+.det-lbl{font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.det-ta{width:100%;font-family:inherit;font-size:14px;color:var(--text);line-height:1.65;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;resize:none;outline:none;background:#fafafa;min-height:60px;overflow:hidden}
+.det-ta:focus{border-color:var(--accent);background:#fff}
+.det-hint{font-size:10px;color:var(--accent);margin-top:5px;opacity:.8}
 
 /* LIVE (purple) overrides */
 .opt-card.live .opt-tag{color:var(--live);background:var(--live-light)}
 .opt-card.live.sel{border-color:var(--live);background:#faf9ff}
 .opt-card.live.sel .opt-icon{background:var(--live-light)}
 .opt-card.live.sel .chk{background:var(--live);border-color:var(--live);color:#fff}
-.opt-card.live .inf-lbl{color:var(--live)}
-.opt-card.live .edtf:focus{background:#f8f5ff;border-color:var(--live)}
+.det-hdr.live .det-lbl{color:var(--live)}
+.det-ta.live:focus{border-color:var(--live);background:#f8f5ff}
 
 /* group header between platform sections */
 .grp-hdr{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
@@ -550,22 +564,7 @@ function buildPlatform(){
         <div class="opt-info"><div class="opt-name">${esc(o.v)}</div><span class="opt-tag">${esc(o.t)}</span></div>
         <div class="opt-actions">
           <div class="chk">✓</div>
-          <button class="exp-btn" id="eb_${cid}" onclick="togExp('${cid}',event)">詳情</button>
-        </div>
-      </div>
-      <div class="exp-area" id="ea_${cid}">
-        <div class="inf-field">
-          <div class="inf-lbl">📖 說明</div>
-          <textarea class="edtf" rows="3" data-s="platform" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="d" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(desc)}</textarea>
-          <div class="edit-hint">點擊文字即可編輯，修改後自動儲存</div>
-        </div>
-        <div class="inf-field">
-          <div class="inf-lbl">🎯 適用場合</div>
-          <textarea class="edtf" rows="2" data-s="platform" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="s" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(suit)}</textarea>
-        </div>
-        <div class="inf-field">
-          <div class="inf-lbl">⚠️ 注意事項</div>
-          <textarea class="edtf" rows="2" data-s="platform" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="n" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(note)}</textarea>
+          <button class="exp-btn" onclick="openDetail('platform','${o.v.replace(/'/g,"\\'")}',${isLive?'true':'false'},event)">詳情</button>
         </div>
       </div>
     </div>`;
@@ -592,22 +591,7 @@ function buildOpts(s){
         <div class="opt-info"><div class="opt-name">${esc(o.v)}</div><span class="opt-tag">${esc(o.t)}</span></div>
         <div class="opt-actions">
           <div class="chk">✓</div>
-          <button class="exp-btn" id="eb_${cid}" onclick="togExp('${cid}',event)">詳情</button>
-        </div>
-      </div>
-      <div class="exp-area" id="ea_${cid}">
-        <div class="inf-field">
-          <div class="inf-lbl">📖 說明</div>
-          <textarea class="edtf" rows="3" data-s="${s.id}" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="d" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(desc)}</textarea>
-          <div class="edit-hint">點擊文字即可編輯，修改後自動儲存</div>
-        </div>
-        <div class="inf-field">
-          <div class="inf-lbl">🎯 適用場合</div>
-          <textarea class="edtf" rows="2" data-s="${s.id}" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="s" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(suit)}</textarea>
-        </div>
-        <div class="inf-field">
-          <div class="inf-lbl">⚠️ 注意事項</div>
-          <textarea class="edtf" rows="2" data-s="${s.id}" data-v="${o.v.replace(/"/g,'&quot;')}" data-f="n" onblur="svFld(this)" onfocus="ag(this)" oninput="ag(this)">${esc(note)}</textarea>
+          <button class="exp-btn" onclick="openDetail('${s.id}','${o.v.replace(/'/g,"\\'")}',false,event)">詳情</button>
         </div>
       </div>
     </div>`;
@@ -657,10 +641,6 @@ function buildDone(){
 // ── EVENTS ────────────────────────────────────────────
 
 function bindStep(s){
-  document.querySelectorAll('.edtf').forEach(ta=>{
-    ag(ta);
-    ta.addEventListener('click',function(){this.removeAttribute('readonly');this.focus();});
-  });
   if(s.type==='form'){
     ['fd','fc','fp','fce','fs','fv'].forEach(id=>{
       document.getElementById(id)?.addEventListener('input',()=>{
@@ -698,21 +678,55 @@ function selOpt(sid,val,multi,ev){
   }
 }
 
-function togExp(cid,ev){
+// ── Detail sheet ─────────────────────────────────────
+let _detSid='',_detVal='';
+
+function openDetail(sid,val,isLive,ev){
   if(ev)ev.stopPropagation();
-  const ea=document.getElementById('ea_'+cid);
-  const eb=document.getElementById('eb_'+cid);
-  if(!ea)return;
-  const open=ea.classList.toggle('open');
-  if(eb)eb.textContent=open?'收起':'詳情';
+  // find opt data
+  let opt=null;
+  if(sid==='platform'){
+    opt=[...PLAT_VIDEO,...PLAT_LIVE].find(o=>o.v===val);
+  } else {
+    const step=SD.find(s=>s.id===sid);
+    opt=step&&step.opts?step.opts.find(o=>o.v===val):null;
+  }
+  if(!opt)return;
+  _detSid=sid; _detVal=val;
+  const hdr=document.getElementById('det-hdr');
+  hdr.className='det-hdr'+(isLive?' live':'');
+  document.getElementById('det-ico').textContent=opt.i;
+  document.getElementById('det-ttl').textContent=opt.v;
+  document.getElementById('det-tag').textContent=opt.t;
+  // set live class on textareas
+  ['d','s','n'].forEach(f=>{
+    const ta=document.getElementById('det-'+f);
+    ta.className='det-ta'+(isLive?' live':'');
+  });
+  // populate fields (localStorage override or default)
+  const desc=gDesc(sid,val,'d')??opt.d??'';
+  const suit=gDesc(sid,val,'s')??opt.s??'';
+  const note=gDesc(sid,val,'n')??opt.n??'';
+  const td=document.getElementById('det-d');
+  const ts=document.getElementById('det-s');
+  const tn=document.getElementById('det-n');
+  td.value=desc; ts.value=suit; tn.value=note;
+  setTimeout(()=>{agDet(td);agDet(ts);agDet(tn);},30);
+  document.getElementById('det-bd').classList.add('show');
+  document.getElementById('det-sh').classList.add('show');
 }
 
-function ag(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
-
-function svFld(el){
-  el.setAttribute('readonly','');
-  sDesc(el.dataset.s,el.dataset.v,el.dataset.f,el.value);
+function closeDetail(){
+  // save any edits before closing
+  ['d','s','n'].forEach(f=>{
+    const ta=document.getElementById('det-'+f);
+    if(ta&&_detSid&&_detVal)sDesc(_detSid,_detVal,f,ta.value);
+  });
+  document.getElementById('det-bd').classList.remove('show');
+  document.getElementById('det-sh').classList.remove('show');
 }
+
+function agDet(el){el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px';}
 
 function chgCnt(t,d){
   if(t==='cam'){F.cameraCount=Math.max(2,F.cameraCount+d);const e=document.getElementById('cc');if(e)e.textContent=F.cameraCount;}
@@ -809,7 +823,36 @@ function printPdf(){
     .meta{font-size:12px;color:#6B7280;margin-bottom:18px}
     pre{white-space:pre-wrap;font-family:inherit;font-size:13px;border:1px solid #E5E7EB;border-radius:12px;padding:18px;background:#F9FAFB}
     @page{margin:18mm}
-  </style></head><body><h1>${esc(title)}</h1><div class="meta">產生時間：${new Date().toLocaleString('zh-TW')}</div><pre>${esc(msg)}</pre></body></html>`;
+  </style></head><body><h1>${esc(title)}</h1><div class="meta">產生時間：${new Date().toLocaleString('zh-TW')}</div><pre>${esc(msg)}</pre>
+<!-- ── Detail bottom sheet ── -->
+<div class="det-bd" id="det-bd" onclick="closeDetail()"></div>
+<div class="det-sh" id="det-sh">
+  <div class="det-hdr" id="det-hdr">
+    <div class="det-drag"></div>
+    <div class="det-hdr-row">
+      <div class="det-ico" id="det-ico"></div>
+      <div><div class="det-ttl" id="det-ttl"></div><span class="det-tag" id="det-tag"></span></div>
+      <button class="det-close" onclick="closeDetail()">✕</button>
+    </div>
+  </div>
+  <div class="det-body">
+    <div class="det-sec">
+      <div class="det-lbl" id="det-lbl-d">📖 說明</div>
+      <textarea class="det-ta" id="det-d" rows="4" oninput="agDet(this)"></textarea>
+      <div class="det-hint">點擊文字即可編輯，修改後自動儲存</div>
+    </div>
+    <div class="det-sec">
+      <div class="det-lbl" id="det-lbl-s">🎯 適用場合</div>
+      <textarea class="det-ta" id="det-s" rows="2" oninput="agDet(this)"></textarea>
+    </div>
+    <div class="det-sec">
+      <div class="det-lbl" id="det-lbl-n">⚠️ 注意事項</div>
+      <textarea class="det-ta" id="det-n" rows="2" oninput="agDet(this)"></textarea>
+    </div>
+  </div>
+</div>
+
+</body></html>`;
   const w=window.open('','_blank');
   if(!w){toastText('請允許彈出視窗後再產生 PDF');return;}
   w.document.open();
@@ -1051,5 +1094,34 @@ function toastText(txt){
 document.getElementById('sync-url').value=syncCodeFromUrl(syncSettings.url)||'meeting';
 render();
 </script>
+
+<!-- ── Detail bottom sheet ── -->
+<div class="det-bd" id="det-bd" onclick="closeDetail()"></div>
+<div class="det-sh" id="det-sh">
+  <div class="det-hdr" id="det-hdr">
+    <div class="det-drag"></div>
+    <div class="det-hdr-row">
+      <div class="det-ico" id="det-ico"></div>
+      <div><div class="det-ttl" id="det-ttl"></div><span class="det-tag" id="det-tag"></span></div>
+      <button class="det-close" onclick="closeDetail()">✕</button>
+    </div>
+  </div>
+  <div class="det-body">
+    <div class="det-sec">
+      <div class="det-lbl" id="det-lbl-d">📖 說明</div>
+      <textarea class="det-ta" id="det-d" rows="4" oninput="agDet(this)"></textarea>
+      <div class="det-hint">點擊文字即可編輯，修改後自動儲存</div>
+    </div>
+    <div class="det-sec">
+      <div class="det-lbl" id="det-lbl-s">🎯 適用場合</div>
+      <textarea class="det-ta" id="det-s" rows="2" oninput="agDet(this)"></textarea>
+    </div>
+    <div class="det-sec">
+      <div class="det-lbl" id="det-lbl-n">⚠️ 注意事項</div>
+      <textarea class="det-ta" id="det-n" rows="2" oninput="agDet(this)"></textarea>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
