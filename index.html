@@ -76,6 +76,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .grp-hdr-lbl{font-size:11px;font-weight:700;letter-spacing:.6px;padding:3px 10px;border-radius:10px;white-space:nowrap}
 .grp-hdr-lbl.video{background:var(--teal-light);color:var(--teal-dark)}
 .grp-hdr-lbl.live{background:var(--live-light);color:var(--live)}
+.grp-hdr-lbl.other{background:#F3F4F2;color:#374151}
+.plat-other-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.plat-other-icon{width:42px;height:42px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.plat-other-inp{flex:1;border:none;outline:none;font-size:15px;font-family:inherit;color:var(--text);background:transparent;min-width:0}
+.plat-other-inp::placeholder{color:#9CA3AF}
 
 /* attendees */
 .att-presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
@@ -146,6 +151,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 @keyframes sheetIn{to{transform:translateX(-50%) translateY(0)}}
 .slide-fwd{animation:sfwd .28s ease}
 .slide-bk{animation:sbk .28s ease}
+
+.date-range-row{display:flex;align-items:center;gap:6px}
+.date-range-row .form-inp{flex:1;min-width:0}
+.date-range-sep{font-size:14px;color:var(--muted);flex-shrink:0;font-weight:500}
+.date-range-hint{font-size:11px;color:var(--muted);margin-top:5px}
+.sales-row{display:flex;align-items:center;gap:6px}
+.sales-row select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%236B7280' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
+.sales-edit-btn{width:44px;height:46px;flex-shrink:0;border:1.5px solid var(--border);border-radius:10px;background:var(--card);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.sales-edit-btn:active{background:var(--teal-light)}
+/* Sales editor sheet */
+.se-bd{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:300;display:none}
+.se-bd.show{display:block}
+.se-sh{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;max-height:85vh;background:#fff;border-radius:20px 20px 0 0;z-index:310;display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.32,.72,0,1);overflow:hidden}
+.se-sh.show{transform:translateX(-50%) translateY(0)}
+.se-hdr{padding:14px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.se-drag{width:36px;height:4px;background:#d1d5db;border-radius:2px;margin:0 auto 10px}
+.se-title{font-size:17px;font-weight:700;margin-bottom:2px}
+.se-sub{font-size:12px;color:var(--muted)}
+.se-body{overflow-y:auto;padding:14px 16px;flex:1}
+.se-list{list-style:none;margin-bottom:12px}
+.se-item{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f3f4f6}
+.se-item:last-child{border-bottom:none}
+.se-name{flex:1;font-size:15px;font-weight:500}
+.se-del{width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:#e24b4a;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.se-add-row{display:flex;gap:8px;margin-top:4px}
+.se-inp{flex:1;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;background:var(--card);outline:none}
+.se-inp:focus{border-color:var(--teal-mid)}
+.se-add{padding:11px 16px;border:none;border-radius:10px;background:var(--teal);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.se-foot{padding:12px 16px 20px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px}
+.se-save{flex:1;padding:13px;border:none;border-radius:12px;background:var(--teal);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.se-close{padding:13px 18px;border:1.5px solid var(--border);border-radius:12px;background:#fff;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 @keyframes sfwd{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
 @keyframes sbk{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:430px){
@@ -296,15 +332,19 @@ const SD = [
   ]},
   {id:'attendees',type:'attendees',key:'attendees',title:'遠端線上與會人數？',sub:'選擇級距或直接輸入人數'},
   {id:'platform',type:'platform',key:'platforms',title:'使用哪個視訊／直播平台？',sub:'可複選，點「詳情」展開說明；直播與視訊平台已分區'},
-  {id:'camera',type:'camera',key:'camera',title:'現場攝影機配置？',sub:'依活動規模與視覺需求決定攝影台數',opts:[
-    {v:'單機攝影',i:'📷',t:'基本配置',
-     d:'單台攝影機固定拍攝，通常架設於正前方或側前方，畫面呈現較靜態。是標準基本配置，成本較低，適合對畫面切換需求不高的場合。',
-     s:'小型內部會議、演講型活動、簡報發表、預算有限的活動',
-     n:'無法進行多角度切換；若講者移動範圍大，需配備附搖臂攝影機或請攝影師跟拍；適合靜態性質較高的場合。'},
+  {id:'camera',type:'camera',key:'camera',title:'現場攝影機配置？',sub:'依活動規模與視覺需求決定攝影配置方式',opts:[
+    {v:'單機攝影（遙控攝影機）',i:'🤖',t:'無人操作',
+     d:'使用電動雲台遙控攝影機，固定架設後由技術人員遠端操控鏡頭方向與焦段，不需攝影師站場，人力成本較低。畫面切換較受限，但已能滿足靜態演講或會議需求。',
+     s:'預算考量的中小型活動、演講型活動、場地人員進出限制嚴格的場合、視訊會議基本畫面',
+     n:'遙控範圍與反應速度有限，不適合動態移動的講者；建議提前確認場地電源位置與架機距離；遙控攝影機型號不同，可用焦段有差異。'},
+    {v:'單機攝影（專人攝影）',i:'📷',t:'人工跟拍',
+     d:'由專業攝影師現場操機，可即時跟拍講者動態、調整構圖，畫面靈活度高於遙控攝影機。屬於基本單機配置，不進行多角度切換，但畫面品質與應變能力更佳。',
+     s:'講者移動範圍大的活動、需要靈活構圖的演講、小型對外直播、預算有限但仍需人工操機的場合',
+     n:'攝影師人力費另計；確認攝影師站位不影響與會者視線；若需特寫與全景交替，建議考慮多機配置。'},
     {v:'多機攝影',i:'🎬',t:'多角度切換',
-     d:'2 台以上攝影機搭配導播台（Switcher）即時切換，可拍攝主講者特寫、全景、聽眾反應、PPT 畫面等多角度，視覺效果更豐富專業。',
-     s:'大型論壇、頒獎典禮、展演型活動、需高品質直播內容的正式活動',
-     n:'費用依台數線性增加；需搭配導播人員操作；建議提前規劃攝影機位置與切換腳本。'},
+     d:'2 台以上攝影機搭配導播台（Switcher）即時切換，可拍攝主講者特寫、全景、聽眾反應、PPT 畫面等多角度，視覺效果豐富專業，適合高規格直播或錄製需求。',
+     s:'大型論壇、頒獎典禮、展演型活動、對外高品質直播、需要豐富視覺呈現的正式活動',
+     n:'費用依台數與導播人力線性增加；建議提前規劃攝影機位置與切換腳本；強烈建議安排技術彩排確認訊號流程。'},
   ]},
   {id:'recording',type:'single',key:'recording',title:'是否需要錄影檔？',sub:'現場錄製的影片檔案交付方式',opts:[
     {v:'需要・客戶自備 USB',i:'💾',t:'自備媒體',
@@ -331,10 +371,14 @@ const SD = [
      n:'若客戶臨時需要播放簡報，現場備妥轉接頭可彈性應對；建議活動前再次確認是否有臨時需求。'},
   ]},
   {id:'caption',type:'caption',key:'caption',title:'是否需要製作字卡？',sub:'字卡（Lower Third）顯示講者姓名、頭銜等資訊',opts:[
-    {v:'需要',i:'🪧',t:'含設計製作',
-     d:'在直播或視訊畫面下方疊加文字條（Lower Third），顯示會議名稱、講者姓名、職稱等資訊，提升畫面專業質感。可依客戶品牌色系客製化設計。',
-     s:'對外直播活動、多位講者輪番上台的論壇、頒獎典禮、需強化品牌識別的正式活動',
-     n:'請提前提供所有講者完整姓名與頭銜（中英文確認）；建議活動前 3-5 天確認名單；字卡數量影響製作費用。'},
+    {v:'需要・客戶提供設計',i:'🪧',t:'客戶自備素材',
+     d:'客戶已備妥字卡設計檔案（如 AI、PNG 或字型規範），我方負責在直播或視訊軟體中操作上板，不含設計費用。',
+     s:'客戶有品牌設計團隊或已有標準字卡範本、預算精簡但仍需字卡的活動',
+     n:'請提前至少 3 天交付設計檔，確認格式（PNG 透明底 / AI）；確認字型授權；提供所有講者完整姓名與頭銜（中英文確認）。'},
+    {v:'需要・含設計製作',i:'✏️',t:'我方設計製作',
+     d:'由我方根據客戶品牌色系、LOGO 及活動風格設計字卡版型，並在現場直播或視訊畫面中即時操作上板。費用含設計工時與操作人力。',
+     s:'無設計資源的客戶、對外正式直播、重視視覺一致性的高端活動、論壇或頒獎典禮',
+     n:'設計費依複雜度另報；建議活動前 5-7 天確認設計方向；請提前提供品牌色碼、LOGO 檔及所有講者完整姓名頭銜。'},
     {v:'不需要',i:'✅',t:'無字卡',
      d:'本次活動不需在畫面疊加字卡，直接輸出原始視訊畫面。',
      s:'內部會議、預算精簡的小型活動、非對外公開的視訊場合',
@@ -369,9 +413,9 @@ const SD = [
 
 let cur=0,goBack=false;
 const F={
-  date:'',client:'',phone:'',clientEmail:'',sales:'',venue:'',
+  date:'',dateEnd:'',client:'',phone:'',clientEmail:'',sales:'',venue:'',
   meetingType:null,attendees:null,attendeesCustom:'',
-  platforms:[],camera:null,cameraCount:2,recording:null,
+  platforms:[],platformOther:'',camera:null,cameraCount:2,recording:null,
   ppt:null,caption:null,captionCount:1,
   linkTime:'',linkNote:'',rehearsal:null,interpret:null,notes:''
 };
@@ -422,10 +466,10 @@ function toRow_(p) {
   const f = p.form || {};
   const attendees = f.attendeesCustom ? f.attendeesCustom + ' 人' : (f.attendees || '');
   const camera = f.camera === '多機攝影' ? '多機攝影（' + f.cameraCount + ' 台）' : (f.camera || '');
-  const caption = f.caption === '需要' ? '需要（' + f.captionCount + ' 張）' : (f.caption || '');
+  const caption = (f.caption === '需要・客戶提供設計' || f.caption === '需要・含設計製作') ? f.caption + '（' + f.captionCount + ' 張）' : (f.caption || '');
   return [
     p.caseId || Utilities.getUuid(), new Date(), f.date || '', f.client || '', f.phone || '',
-    f.clientEmail || '', f.sales || '', f.venue || '', f.meetingType || '', attendees, (f.platforms || []).join('、'),
+    f.clientEmail || '', f.sales || '', f.venue || '', f.meetingType || '', attendees, [...(f.platforms||[]),...(f.platformOther&&f.platformOther.trim()?[f.platformOther.trim()]:[])].join('、'),
     camera, f.recording || '', f.ppt || '', caption, f.linkTime || '', f.rehearsal || '',
     f.interpret || '', f.notes || '', p.message || '', JSON.stringify(p)
   ];
@@ -505,15 +549,30 @@ function buildStep(s){
 }
 
 function buildForm(){
-  return `<div class="form-row">
-    <div class="form-grp"><label class="form-lbl req">活動日期</label><input class="form-inp" type="date" id="fd" value="${F.date}"></div>
-    <div class="form-grp"><label class="form-lbl req">客戶名稱</label><input class="form-inp" type="text" id="fc" placeholder="公司/姓名" value="${esc(F.client)}"></div>
+  const salesOpts=getSalesList().map(n=>`<option value="${esc(n)}"${F.sales===n?' selected':''}>${esc(n)}</option>`).join('');
+  return `<div class="form-grp">
+    <label class="form-lbl req">活動日期</label>
+    <div class="date-range-row">
+      <input class="form-inp" type="date" id="fd" value="${F.date}" placeholder="開始日期">
+      <span class="date-range-sep">〜</span>
+      <input class="form-inp" type="date" id="fde" value="${F.dateEnd}" placeholder="結束（選填）">
+    </div>
+    <div class="date-range-hint">多天活動請填結束日；單日只填左邊即可</div>
   </div>
   <div class="form-row">
+    <div class="form-grp"><label class="form-lbl req">客戶名稱</label><input class="form-inp" type="text" id="fc" placeholder="公司/姓名" value="${esc(F.client)}"></div>
     <div class="form-grp"><label class="form-lbl req">聯絡電話</label><input class="form-inp" type="tel" id="fp" placeholder="09xx-xxx-xxx" value="${esc(F.phone)}"></div>
-    <div class="form-grp"><label class="form-lbl">負責業務</label><input class="form-inp" type="text" id="fs" placeholder="業務姓名" value="${esc(F.sales)}"></div>
   </div>
-  <div class="form-grp"><label class="form-lbl">客戶 Email</label><input class="form-inp" type="email" id="fce" placeholder="client@example.com" value="${esc(F.clientEmail)}"></div>
+  <div class="form-row">
+    <div class="form-grp">
+      <label class="form-lbl req">負責業務</label>
+      <div class="sales-row">
+        <select class="form-inp" id="fs" style="flex:1">${salesOpts}</select>
+        <button class="sales-edit-btn" onclick="openSalesEdit(event)" title="編輯業務名單">✏️</button>
+      </div>
+    </div>
+    <div class="form-grp"><label class="form-lbl">客戶 Email</label><input class="form-inp" type="email" id="fce" placeholder="client@example.com" value="${esc(F.clientEmail)}"></div>
+  </div>
   <div class="form-grp"><label class="form-lbl">會議廳／地點</label><input class="form-inp" type="text" id="fv" placeholder="場地名稱或地址" value="${esc(F.venue)}"></div>`;
 }
 
@@ -574,6 +633,11 @@ function buildPlatform(){
   h+=PLAT_VIDEO.map(card).join('');
   h+=`<div class="grp-hdr"><div class="grp-hdr-line"></div><span class="grp-hdr-lbl live">📡 直播平台</span><div class="grp-hdr-line"></div></div>`;
   h+=PLAT_LIVE.map(card).join('');
+  h+=`<div class="grp-hdr"><div class="grp-hdr-line"></div><span class="grp-hdr-lbl other">⌨️ 其他平台</span><div class="grp-hdr-line"></div></div>
+  <div class="plat-other-card">
+    <div class="plat-other-icon">➕</div>
+    <input class="plat-other-inp" id="plat-other" type="text" placeholder="輸入其他平台名稱（如 Webex Events、OBS…）" value="${esc(F.platformOther)}" oninput="F.platformOther=this.value">
+  </div>`;
   return h;
 }
 
@@ -606,7 +670,7 @@ function buildCamera(s){
 
 function buildCaption(s){
   let h=buildOpts(s);
-  if(F.caption==='需要')h+=`<div class="sub-blk"><div class="sub-lbl">字卡數量（張）</div><div class="ctr-wrap"><button class="ctr-btn" onclick="chgCnt('cap',-1)">−</button><div class="ctr-val" id="cp">${F.captionCount}</div><button class="ctr-btn" onclick="chgCnt('cap',1)">＋</button></div></div>`;
+  if(F.caption==='需要・客戶提供設計'||F.caption==='需要・含設計製作')h+=`<div class="sub-blk"><div class="sub-lbl">字卡數量（張）</div><div class="ctr-wrap"><button class="ctr-btn" onclick="chgCnt('cap',-1)">−</button><div class="ctr-val" id="cp">${F.captionCount}</div><button class="ctr-btn" onclick="chgCnt('cap',1)">＋</button></div></div>`;
   return h;
 }
 
@@ -642,9 +706,10 @@ function buildDone(){
 
 function bindStep(s){
   if(s.type==='form'){
-    ['fd','fc','fp','fce','fs','fv'].forEach(id=>{
+    ['fd','fde','fc','fp','fce','fs','fv'].forEach(id=>{
       document.getElementById(id)?.addEventListener('input',()=>{
         F.date=document.getElementById('fd')?.value||F.date;
+        F.dateEnd=document.getElementById('fde')?.value||'';
         F.client=document.getElementById('fc')?.value||F.client;
         F.phone=document.getElementById('fp')?.value||F.phone;
         F.clientEmail=document.getElementById('fce')?.value||F.clientEmail;
@@ -652,6 +717,7 @@ function bindStep(s){
         F.venue=document.getElementById('fv')?.value||F.venue;
       });
     });
+    document.getElementById('fs')?.addEventListener('change',e=>F.sales=e.target.value);
   }
   if(s.type==='timing'){
     document.getElementById('flt')?.addEventListener('input',e=>F.linkTime=e.target.value);
@@ -750,13 +816,15 @@ function collectStep(){
   if(!s)return;
   if(s.type==='form'){
     F.date=document.getElementById('fd')?.value||F.date;
+    F.dateEnd=document.getElementById('fde')?.value||'';
     F.client=document.getElementById('fc')?.value||F.client;
     F.phone=document.getElementById('fp')?.value||F.phone;
     F.clientEmail=document.getElementById('fce')?.value||F.clientEmail;
-    F.sales=document.getElementById('fs')?.value||F.sales;
+    const fsEl=document.getElementById('fs');if(fsEl)F.sales=fsEl.value;
     F.venue=document.getElementById('fv')?.value||F.venue;
   }
   if(s.type==='attendees'){const c=document.getElementById('att-custom');if(c&&c.value)F.attendeesCustom=c.value;}
+  if(s.type==='platform'){const po=document.getElementById('plat-other');if(po)F.platformOther=po.value;}
   if(s.type==='timing'){F.linkTime=document.getElementById('flt')?.value||F.linkTime;F.linkNote=document.getElementById('fln')?.value||F.linkNote;}
   if(s.type==='notes')F.notes=document.getElementById('fn')?.value||F.notes;
 }
@@ -765,13 +833,16 @@ function collectStep(){
 
 function buildMsg(){
   const camStr=F.camera==='多機攝影'?`多機攝影（${F.cameraCount} 台）`:(F.camera||'—');
-  const capStr=F.caption==='需要'?`需要（${F.captionCount} 張）`:(F.caption||'—');
-  const platStr=Array.isArray(F.platforms)&&F.platforms.length?F.platforms.join('、'):'—';
+  const capStr=(F.caption==='需要・客戶提供設計'||F.caption==='需要・含設計製作')?`${F.caption}（${F.captionCount} 張）`:(F.caption||'—');
+  const allPlats=[...(Array.isArray(F.platforms)?F.platforms:[])];
+  if(F.platformOther&&F.platformOther.trim())allPlats.push(F.platformOther.trim());
+  const platStr=allPlats.length?allPlats.join('、'):'—';
   const ltStr=F.linkTime?F.linkTime.replace('T',' '):'—';
   const attStr=F.attendeesCustom?F.attendeesCustom+' 人':(F.attendees||'—');
   let m='📋 視訊會議需求確認\n';
   m+='━━━━━━━━━━━━━━━━\n';
-  m+=`📅 活動日期：${F.date||'—'}\n`;
+  const dateStr=F.dateEnd?`${F.date} 〜 ${F.dateEnd}`:F.date||'—';
+  m+=`📅 活動日期：${dateStr}\n`;
   m+=`🏢 客　　戶：${F.client||'—'}\n`;
   m+=`📞 聯絡電話：${F.phone||'—'}\n`;
   if(F.sales)m+=`👤 負責業務：${F.sales}\n`;
@@ -852,6 +923,27 @@ function printPdf(){
   </div>
 </div>
 
+
+<!-- ── Sales editor sheet ── -->
+<div class="se-bd" id="se-bd" onclick="closeSalesEdit()"></div>
+<div class="se-sh" id="se-sh">
+  <div class="se-hdr">
+    <div class="se-drag"></div>
+    <div class="se-title">✏️ 業務名單維護</div>
+    <div class="se-sub">可新增、刪除，儲存後在本裝置永久生效</div>
+  </div>
+  <div class="se-body">
+    <ul class="se-list" id="se-list"></ul>
+    <div class="se-add-row">
+      <input class="se-inp" id="se-inp" placeholder="輸入姓名後按新增" maxlength="10">
+      <button class="se-add" onclick="seAddName()">新增</button>
+    </div>
+  </div>
+  <div class="se-foot">
+    <button class="se-save" onclick="saveSalesEdit()">儲存並套用</button>
+    <button class="se-close" onclick="closeSalesEdit()">取消</button>
+  </div>
+</div>
 </body></html>`;
   const w=window.open('','_blank');
   if(!w){toastText('請允許彈出視窗後再產生 PDF');return;}
@@ -916,7 +1008,7 @@ async function createGmailDraft(type){
 
 function resetAll(){
   if(!confirm('確定要清空所有填寫內容嗎？'))return;
-  Object.assign(F,{date:'',client:'',phone:'',clientEmail:'',sales:'',venue:'',meetingType:null,attendees:null,attendeesCustom:'',platforms:[],camera:null,cameraCount:2,recording:null,ppt:null,caption:null,captionCount:1,linkTime:'',linkNote:'',rehearsal:null,interpret:null,notes:''});
+  Object.assign(F,{date:'',dateEnd:'',client:'',phone:'',clientEmail:'',sales:'',venue:'',meetingType:null,attendees:null,attendeesCustom:'',platforms:[],platformOther:'',camera:null,cameraCount:2,recording:null,ppt:null,caption:null,captionCount:1,linkTime:'',linkNote:'',rehearsal:null,interpret:null,notes:''});
   caseId='';localStorage.removeItem('vc_demo_case_id');
   cur=0;goBack=false;render();
 }
@@ -1091,6 +1183,56 @@ function toastText(txt){
   setTimeout(()=>{t.classList.remove('show');t.textContent='✅ 已複製到剪貼簿';},2500);
 }
 
+
+// ── SALES LIST ────────────────────────────────────────
+const SALES_KEY='vc_sales_list_v1';
+const DEFAULT_SALES=['沙庭羽','鄭武勇','蕭定洲','游瑋平','王忠謙','周予晴','楊三和','華昱涵','吳冠輝'];
+let _seList=[];
+
+function getSalesList(){
+  try{const s=localStorage.getItem(SALES_KEY);return s?JSON.parse(s):DEFAULT_SALES;}
+  catch{return DEFAULT_SALES;}
+}
+function saveSalesList(list){localStorage.setItem(SALES_KEY,JSON.stringify(list));}
+
+function openSalesEdit(ev){
+  if(ev)ev.preventDefault();
+  _seList=[...getSalesList()];
+  renderSeList();
+  document.getElementById('se-bd').classList.add('show');
+  document.getElementById('se-sh').classList.add('show');
+}
+function closeSalesEdit(){
+  document.getElementById('se-bd').classList.remove('show');
+  document.getElementById('se-sh').classList.remove('show');
+}
+function renderSeList(){
+  const ul=document.getElementById('se-list');
+  ul.innerHTML=_seList.map((n,i)=>`<li class="se-item"><span class="se-name">${esc(n)}</span><button class="se-del" onclick="seDelName(${i})">✕</button></li>`).join('');
+}
+function seAddName(){
+  const inp=document.getElementById('se-inp');
+  const name=(inp.value||'').trim();
+  if(!name)return;
+  if(_seList.includes(name)){inp.value='';return;}
+  _seList.push(name);
+  renderSeList();
+  inp.value='';inp.focus();
+}
+function seDelName(i){_seList.splice(i,1);renderSeList();}
+function saveSalesEdit(){
+  saveSalesList(_seList);
+  closeSalesEdit();
+  // refresh the select if still on form step
+  const fs=document.getElementById('fs');
+  if(fs){
+    const cur=F.sales;
+    fs.innerHTML=getSalesList().map(n=>`<option value="${esc(n)}"${cur===n?' selected':''}>${esc(n)}</option>`).join('');
+    if(!getSalesList().includes(cur)&&getSalesList().length)F.sales=getSalesList()[0];
+  }
+}
+document.getElementById('se-inp')?.addEventListener('keydown',e=>{if(e.key==='Enter')seAddName();});
+
 document.getElementById('sync-url').value=syncCodeFromUrl(syncSettings.url)||'meeting';
 render();
 </script>
@@ -1123,5 +1265,26 @@ render();
   </div>
 </div>
 
+
+<!-- ── Sales editor sheet ── -->
+<div class="se-bd" id="se-bd" onclick="closeSalesEdit()"></div>
+<div class="se-sh" id="se-sh">
+  <div class="se-hdr">
+    <div class="se-drag"></div>
+    <div class="se-title">✏️ 業務名單維護</div>
+    <div class="se-sub">可新增、刪除，儲存後在本裝置永久生效</div>
+  </div>
+  <div class="se-body">
+    <ul class="se-list" id="se-list"></ul>
+    <div class="se-add-row">
+      <input class="se-inp" id="se-inp" placeholder="輸入姓名後按新增" maxlength="10">
+      <button class="se-add" onclick="seAddName()">新增</button>
+    </div>
+  </div>
+  <div class="se-foot">
+    <button class="se-save" onclick="saveSalesEdit()">儲存並套用</button>
+    <button class="se-close" onclick="closeSalesEdit()">取消</button>
+  </div>
+</div>
 </body>
 </html>
