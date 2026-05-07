@@ -462,7 +462,7 @@ function toRow_(p) {
   const f = p.form || {};
   const attendees = f.attendeesCustom ? f.attendeesCustom + ' 人' : (f.attendees || '');
   const camera = f.camera === '多機攝影' ? '多機攝影（' + f.cameraCount + ' 台）' : (f.camera || '');
-  const caption = (f.caption === '需要・客戶提供設計' || f.caption === '需要・含設計製作') ? f.caption + '（' + f.captionCount + ' 張）' : (f.caption || '');
+  const caption = f.caption || '';
   return [
     p.caseId || Utilities.getUuid(), new Date(), f.date || '', f.client || '', f.phone || '',
     f.clientEmail || '', f.sales || '', f.venue || '', f.meetingType || '', attendees, [...(f.platforms||[]),...(f.platformOther&&f.platformOther.trim()?[f.platformOther.trim()]:[])].join('、'),
@@ -666,7 +666,7 @@ function buildCamera(s){
 
 function buildCaption(s){
   let h=buildOpts(s);
-  if(F.caption==='需要・客戶提供設計'||F.caption==='需要・含設計製作')h+=`<div class="sub-blk"><div class="sub-lbl">字卡數量（張）</div><div class="ctr-wrap"><button class="ctr-btn" onclick="chgCnt('cap',-1)">−</button><div class="ctr-val" id="cp">${F.captionCount}</div><button class="ctr-btn" onclick="chgCnt('cap',1)">＋</button></div></div>`;
+  // 字卡張數不顯示計數器
   return h;
 }
 
@@ -829,7 +829,7 @@ function collectStep(){
 
 function buildMsg(){
   const camStr=F.camera==='多機攝影'?`多機攝影（${F.cameraCount} 台）`:(F.camera||'—');
-  const capStr=(F.caption==='需要・客戶提供設計'||F.caption==='需要・含設計製作')?`${F.caption}（${F.captionCount} 張）`:(F.caption||'—');
+  const capStr=F.caption||'—';
   const allPlats=[...(Array.isArray(F.platforms)?F.platforms:[])];
   if(F.platformOther&&F.platformOther.trim())allPlats.push(F.platformOther.trim());
   const platStr=allPlats.length?allPlats.join('、'):'—';
