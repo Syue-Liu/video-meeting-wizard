@@ -346,19 +346,15 @@ const SD = [
      s:'大型論壇、頒獎典禮、展演型活動、對外高品質直播、需要豐富視覺呈現的正式活動',
      n:'費用依台數與導播人力線性增加；建議提前規劃攝影機位置與切換腳本；強烈建議安排技術彩排確認訊號流程。'},
   ]},
-  {id:'recording',type:'single',key:'recording',title:'是否需要錄影檔？',sub:'現場錄製的影片檔案交付方式',opts:[
-    {v:'需要・客戶自備 USB',i:'💾',t:'自備媒體',
-     d:'客戶自行準備 USB 隨身碟，現場錄製完畢後直接交付，不需額外耗材費用，是最常見的錄影交付方式。',
-     s:'客戶有 USB 且希望降低耗材成本',
-     n:'建議容量 32GB 以上、USB 3.0 規格；確認格式（FAT32 / exFAT）；1080P 影片每小時約需 8-15GB；請確認剩餘容量。'},
-    {v:'需要・我方提供 USB',i:'🗂️',t:'含耗材費',
-     d:'由我方準備 USB 隨身碟，現場錄製後連同隨身碟一起交付給客戶，費用含耗材成本。',
-     s:'客戶未準備隨身碟、或希望一站式服務',
-     n:'耗材費用依容量計入報價；可確認是否需要在錄影後進行基礎剪輯；活動結束當天即可交付。'},
+  {id:'recording',type:'single',key:'recording',title:'是否需要錄影檔？',sub:'我方提供 USB，現場錄製後直接交付',opts:[
+    {v:'需要',i:'💾',t:'我方提供 USB',
+     d:'由我方提供 USB 隨身碟，現場錄製完畢後直接交付給客戶。費用含耗材成本，活動結束當天即可取件。',
+     s:'需要保留活動影像紀錄、日後回放或剪輯使用的場合',
+     n:'1080P 影片每小時約需 8-15GB；如需高畫質或長時間錄製請提前告知；可確認是否需要基礎剪輯服務（另計費）。'},
     {v:'不需要',i:'🚫',t:'無錄影',
      d:'本次活動無錄影需求，僅進行現場視訊傳輸或直播，不保留影片檔案。',
      s:'內部非正式會議、不需回放的活動、或另行透過平台雲端錄影功能自行處理',
-     n:'若日後有回看需求，可事先透過 Zoom、Google Meet 等平台的雲端錄影功能自行儲存（依版本而異）。'},
+     n:'若日後有回看需求，可透過 Zoom、Google Meet 等平台的雲端錄影功能自行儲存（依版本而異）。'},
   ]},
   {id:'ppt',type:'single',key:'ppt',title:'是否需接入客戶電腦簡報？',sub:'確認 PPT / Keynote 等簡報的傳輸方式',opts:[
     {v:'需要',i:'📊',t:'需確認規格',
@@ -612,7 +608,7 @@ function buildPlatform(){
   const sel=Array.isArray(F.platforms)?F.platforms:[];
   function card(o){
     const isSel=sel.includes(o.v);
-    const cid='c_platform_'+o.v.replace(/[^a-z0-9]/gi,'_');
+    const cid='c_platform_'+Array.from(o.v).map(c=>c.charCodeAt(0).toString(16)).join('');
     const isLive=o.g==='live';
     const desc=gDesc('platform',o.v,'d')??o.d;
     const suit=gDesc('platform',o.v,'s')??o.s;
@@ -645,7 +641,7 @@ function buildOpts(s){
   const sel=F[s.key];
   return s.opts.map(o=>{
     const isSel=sel===o.v;
-    const cid='c_'+s.id+'_'+o.v.replace(/[^a-z0-9]/gi,'_');
+    const cid='c_'+s.id+'_'+Array.from(o.v).map(c=>c.charCodeAt(0).toString(16)).join('');
     const desc=gDesc(s.id,o.v,'d')??o.d;
     const suit=gDesc(s.id,o.v,'s')??o.s;
     const note=gDesc(s.id,o.v,'n')??o.n;
@@ -733,12 +729,12 @@ function selOpt(sid,val,multi,ev){
     if(!Array.isArray(F[s.key]))F[s.key]=[];
     const i=F[s.key].indexOf(val);
     if(i===-1)F[s.key].push(val);else F[s.key].splice(i,1);
-    const cid='c_'+sid+'_'+val.replace(/[^a-z0-9]/gi,'_');
+    const cid='c_'+sid+'_'+Array.from(val).map(c=>c.charCodeAt(0).toString(16)).join('');
     document.getElementById(cid)?.classList.toggle('sel',F[s.key].includes(val));
   } else {
     F[s.key]=val;
     document.querySelectorAll('.opt-card').forEach(c=>c.classList.remove('sel'));
-    const cid='c_'+sid+'_'+val.replace(/[^a-z0-9]/gi,'_');
+    const cid='c_'+sid+'_'+Array.from(val).map(c=>c.charCodeAt(0).toString(16)).join('');
     document.getElementById(cid)?.classList.add('sel');
     if(sid==='camera'||sid==='caption')setTimeout(()=>render(),30);
   }
