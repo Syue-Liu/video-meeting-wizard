@@ -14,7 +14,7 @@
           <h1>巨大花朵採果地圖</h1>
           <div class="top-actions">
             <button id="locateButton" class="icon-button" type="button" title="更新目前位置">定位我</button>
-            <button id="syncNowButton" class="icon-button" type="button" title="同步共享花點">同步</button>
+            <button id="menuButton" class="icon-button menu-button" type="button" title="開啟設定">選單</button>
             <button id="exportButton" class="icon-button" type="button" title="匯出資料">匯出</button>
           </div>
         </div>
@@ -97,32 +97,10 @@
           </section>
         </details>
 
-        <details class="tool-card sync-panel" aria-label="多人共享同步設定">
-        <summary>
-          <span>多人共享</span>
-          <strong id="syncSummary">尚未設定同步</strong>
-        </summary>
-        <div class="sync-grid">
-          <label>
-            Google Apps Script 網址
-            <input id="syncUrlInput" inputmode="url" placeholder="貼上 Web App 部署網址" />
-          </label>
-          <label>
-            你的暱稱
-            <input id="reporterInput" placeholder="例：小明、北區隊友" />
-          </label>
-        </div>
-        <div class="button-row">
-          <button id="saveSyncButton" class="primary" type="button">儲存同步設定</button>
-          <button id="pullSyncButton" class="secondary" type="button">讀取大家的花點</button>
-        </div>
-        <p id="syncHint" class="hint">朋友們使用同一個同步網址，就會看到同一批巨大花朵。</p>
-      </details>
-
         <details class="tool-card input-panel" aria-label="新增巨大花朵">
         <summary>
-          <span>新增巨大花朵</span>
-          <strong>貼連結、選花種、輸入剩餘時間</strong>
+          <span>新增</span>
+          <strong>貼 Google Maps 地點</strong>
         </summary>
         <label>
           Google Maps 連結或座標
@@ -175,7 +153,7 @@
           <div>
             <label class="route-check">
               <input data-field="selectedRoute" type="checkbox" />
-              加入路線
+              <span>選為目的地</span>
             </label>
             <h3></h3>
             <p class="meta"></p>
@@ -219,5 +197,36 @@
     </template>
 
     <script src="./pikmin-flower-map.js"></script>
+    <div id="menuBackdrop" class="menu-backdrop" hidden></div>
+    <aside id="menuDrawer" class="menu-drawer" aria-label="設定選單" hidden>
+      <div class="menu-head">
+        <div>
+          <span>設定</span>
+          <strong>同步與共享</strong>
+        </div>
+        <button id="closeMenuButton" class="secondary compact" type="button">關閉</button>
+      </div>
+      <section class="sync-panel" aria-label="多人共享同步設定">
+        <div class="sync-title">
+          <span>多人共享</span>
+          <strong id="syncSummary">尚未設定同步</strong>
+        </div>
+        <div class="sync-grid">
+          <label>
+            Google Apps Script 網址
+            <input id="syncUrlInput" inputmode="url" placeholder="貼上 Web App 部署網址" />
+          </label>
+          <label>
+            你的暱稱
+            <input id="reporterInput" placeholder="例：小明、北區隊友" />
+          </label>
+        </div>
+        <div class="button-row">
+          <button id="saveSyncButton" class="primary" type="button">儲存同步設定</button>
+          <button id="pullSyncButton" class="secondary" type="button">讀取大家的花點</button>
+        </div>
+        <p id="syncHint" class="hint">朋友們使用同一個同步網址，就會看到同一批巨大花朵。</p>
+      </section>
+    </aside>
   </body>
 </html>

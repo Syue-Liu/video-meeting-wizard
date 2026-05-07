@@ -53,7 +53,10 @@ const els = {
   addButton: document.querySelector("#addButton"),
   clearExpiredButton: document.querySelector("#clearExpiredButton"),
   locateButton: document.querySelector("#locateButton"),
-  syncNowButton: document.querySelector("#syncNowButton"),
+  menuButton: document.querySelector("#menuButton"),
+  closeMenuButton: document.querySelector("#closeMenuButton"),
+  menuBackdrop: document.querySelector("#menuBackdrop"),
+  menuDrawer: document.querySelector("#menuDrawer"),
   exportButton: document.querySelector("#exportButton"),
   fitButton: document.querySelector("#fitButton"),
   travelModeInput: document.querySelector("#travelModeInput"),
@@ -718,11 +721,23 @@ function exportData() {
   URL.revokeObjectURL(url);
 }
 
+function openMenu() {
+  els.menuBackdrop.hidden = false;
+  els.menuDrawer.hidden = false;
+}
+
+function closeMenu() {
+  els.menuBackdrop.hidden = true;
+  els.menuDrawer.hidden = true;
+}
+
 function bindEvents() {
   els.addButton.addEventListener("click", addFlower);
   els.clearExpiredButton.addEventListener("click", clearExpired);
   els.locateButton.addEventListener("click", locateUser);
-  els.syncNowButton.addEventListener("click", pullSharedFlowers);
+  els.menuButton.addEventListener("click", openMenu);
+  els.closeMenuButton.addEventListener("click", closeMenu);
+  els.menuBackdrop.addEventListener("click", closeMenu);
   els.exportButton.addEventListener("click", exportData);
   els.fitButton.addEventListener("click", renderMap);
   els.travelModeInput.addEventListener("change", render);

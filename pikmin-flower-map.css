@@ -80,8 +80,9 @@ button:disabled {
 .hero-panel img {
   width: 100%;
   height: 150px;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
+  background: #f4fbf6;
   align-self: stretch;
 }
 
@@ -135,6 +136,11 @@ h3 {
   background: #fff;
   border-color: var(--line);
   color: var(--ink);
+}
+
+.menu-button::before {
+  content: "☰";
+  margin-right: 6px;
 }
 
 .primary {
@@ -207,7 +213,28 @@ h3 {
 }
 
 .sync-panel {
+  display: grid;
+  gap: 13px;
+  padding: 0;
   background: linear-gradient(180deg, #ffffff 0, #f8fbff 100%);
+}
+
+.sync-title {
+  display: grid;
+  gap: 4px;
+}
+
+.sync-title span,
+.menu-head span {
+  color: var(--leaf);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.sync-title strong,
+.menu-head strong {
+  color: #26343b;
+  font-size: 18px;
 }
 
 .tool-card summary {
@@ -497,18 +524,58 @@ select:focus {
 }
 
 .route-check {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 7px;
-  margin: 0 0 7px;
+  gap: 8px;
+  margin: 0 0 9px;
+  border: 1px solid #d6e6dd;
+  border-radius: 999px;
+  background: #f2faf5;
+  padding: 7px 10px;
   color: var(--leaf-dark);
   font-size: 13px;
+  font-weight: 900;
 }
 
 .route-check input {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   accent-color: var(--leaf);
+}
+
+.route-check:has(input:checked) {
+  border-color: var(--leaf);
+  background: var(--leaf);
+  color: #fff;
+}
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(32 36 42 / 46%);
+}
+
+.menu-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 41;
+  width: min(420px, 92vw);
+  overflow: auto;
+  border-left: 1px solid var(--line);
+  background: #fff;
+  box-shadow: -18px 0 42px rgb(32 36 42 / 22%);
+  padding: 16px;
+}
+
+.menu-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
 }
 
 .meta {
@@ -609,6 +676,7 @@ select:focus {
   .hero-panel img {
     height: 130px;
     order: initial;
+    padding: 6px;
   }
 
   .status-grid,
@@ -680,6 +748,10 @@ select:focus {
   .top-actions {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .menu-button::before {
+    margin-right: 4px;
   }
 
   .input-panel {
