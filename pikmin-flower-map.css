@@ -53,17 +53,17 @@ button:disabled {
 .app-shell {
   width: min(100%, 1180px);
   margin: 0 auto;
-  padding: 14px 14px 56px;
+  padding: 10px 14px 56px;
 }
 
 .hero-panel {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(280px, 0.72fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 12px;
   align-items: center;
   overflow: hidden;
-  margin: 0 0 14px;
+  margin: 0 0 10px;
   border: 1px solid #dfe8dc;
   border-radius: 8px;
   background: linear-gradient(135deg, #ffffff 0%, #f5fbf4 58%, #eef7fb 100%);
@@ -73,21 +73,13 @@ button:disabled {
 .hero-copy {
   z-index: 1;
   display: grid;
-  gap: 12px;
-  padding: 22px;
-}
-
-.hero-copy p:not(.kicker) {
-  margin: 0;
-  max-width: 34rem;
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.55;
+  gap: 10px;
+  padding: 16px;
 }
 
 .hero-panel img {
   width: 100%;
-  height: 230px;
+  height: 150px;
   object-fit: cover;
   object-position: center;
   align-self: stretch;
@@ -115,7 +107,7 @@ h3 {
 
 h1 {
   color: #26343b;
-  font-size: clamp(26px, 4vw, 42px);
+  font-size: clamp(24px, 4vw, 36px);
   line-height: 1.08;
 }
 
@@ -173,10 +165,8 @@ h3 {
 }
 
 .status-grid div,
-.input-panel,
-.sync-panel,
-.map-panel,
-.route-panel {
+.tool-card,
+.map-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -204,55 +194,53 @@ h3 {
   white-space: nowrap;
 }
 
-.input-panel {
+.tool-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tool-card {
   display: grid;
   gap: 13px;
-  margin: 0 0 14px;
   padding: 16px;
 }
 
 .sync-panel {
-  display: grid;
-  gap: 13px;
-  margin: 0 0 14px;
-  padding: 16px;
   background: linear-gradient(180deg, #ffffff 0, #f8fbff 100%);
 }
 
-.input-panel summary,
-.sync-panel summary {
-  display: grid;
-  gap: 4px;
+.tool-card summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: -2px 0 2px;
   cursor: pointer;
   list-style: none;
 }
 
-.input-panel summary::-webkit-details-marker,
-.sync-panel summary::-webkit-details-marker {
+.tool-card summary::-webkit-details-marker {
   display: none;
 }
 
-.input-panel summary span,
-.sync-panel summary span {
+.tool-card summary span {
   color: var(--leaf);
   font-size: 13px;
   font-weight: 900;
 }
 
-.input-panel summary strong,
-.sync-panel summary strong {
+.tool-card summary strong {
   color: #26343b;
-  font-size: 18px;
+  font-size: 16px;
+  text-align: right;
 }
 
-.input-panel:not([open]),
-.sync-panel:not([open]) {
+.tool-card:not([open]) {
   display: block;
 }
 
-.input-panel:not([open]) summary,
-.sync-panel:not([open]) summary {
+.tool-card:not([open]) summary {
   margin: 0;
 }
 
@@ -323,16 +311,12 @@ select:focus {
   font-weight: 800;
 }
 
-.map-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(330px, 0.8fr);
-  gap: 14px;
-  align-items: start;
+.map-panel {
+  padding: 14px;
 }
 
-.map-panel,
-.route-panel {
-  padding: 14px;
+.primary-map {
+  margin: 0;
 }
 
 .map-toolbar,
@@ -610,27 +594,26 @@ select:focus {
 
 @media (max-width: 860px) {
   .app-shell {
-    padding: 10px 10px 126px;
+    padding: 8px 8px 126px;
   }
 
   .hero-panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) 112px;
     gap: 0;
   }
 
   .hero-copy {
-    padding: 18px 16px 12px;
+    padding: 14px 12px;
   }
 
   .hero-panel img {
-    height: 190px;
-    order: -1;
+    height: 130px;
+    order: initial;
   }
 
   .status-grid,
   .form-grid,
-  .sync-grid,
-  .map-layout {
+  .sync-grid {
     grid-template-columns: 1fr;
   }
 
@@ -651,11 +634,10 @@ select:focus {
   }
 
   .map-canvas {
-    min-height: 340px;
+    min-height: 56vh;
   }
 
   .route-panel {
-    order: -1;
     padding: 12px;
   }
 
@@ -667,7 +649,7 @@ select:focus {
 
 @media (max-width: 540px) {
   h1 {
-    font-size: 30px;
+    font-size: 24px;
   }
 
   h2 {
@@ -691,12 +673,8 @@ select:focus {
     display: grid;
   }
 
-  .hero-copy p:not(.kicker) {
-    font-size: 15px;
-  }
-
   .hero-panel img {
-    height: 160px;
+    height: 118px;
   }
 
   .top-actions {
@@ -706,6 +684,15 @@ select:focus {
 
   .input-panel {
     padding: 14px;
+  }
+
+  .tool-card,
+  .map-panel {
+    padding: 12px;
+  }
+
+  .tool-card summary {
+    align-items: flex-start;
   }
 
   .route-controls {

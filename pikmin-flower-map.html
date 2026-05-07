@@ -12,7 +12,6 @@
         <div class="hero-copy">
           <p class="kicker">Pikmin Bloom 輔助筆記</p>
           <h1>巨大花朵採果地圖</h1>
-          <p>貼上 Google Maps 位置，挑想去的花點，幫你排一條採果路線。</p>
           <div class="top-actions">
             <button id="locateButton" class="icon-button" type="button" title="更新目前位置">定位我</button>
             <button id="syncNowButton" class="icon-button" type="button" title="同步共享花點">同步</button>
@@ -22,34 +21,83 @@
         <img src="./assets/pikmin-route-hero-mobile.jpg" alt="" />
       </header>
 
-      <section class="status-grid" aria-label="目前採果狀態">
-        <div>
-          <span>總花點</span>
-          <strong id="totalCount">0</strong>
+      <section class="map-panel primary-map">
+        <div class="map-toolbar">
+          <div>
+            <h2>採果地圖</h2>
+            <p id="mapCaption">新增花點後會依照位置畫在這裡。</p>
+          </div>
+          <button id="fitButton" class="secondary compact" type="button">重新置中</button>
         </div>
-        <div>
-          <span>可採</span>
-          <strong id="readyCount">0</strong>
-        </div>
-        <div>
-          <span>快結束</span>
-          <strong id="urgentCount">0</strong>
-        </div>
-        <div>
-          <span>來得及</span>
-          <strong id="reachableCount">待定位</strong>
-        </div>
-        <div>
-          <span>最近距離</span>
-          <strong id="nearestDistance">待定位</strong>
-        </div>
-        <div>
-          <span>最近</span>
-          <strong id="nearestLabel">尚無花點</strong>
-        </div>
+        <div id="mapCanvas" class="map-canvas" aria-label="巨大花朵相對位置地圖"></div>
       </section>
 
-      <details class="sync-panel" aria-label="多人共享同步設定">
+      <section class="tool-cards" aria-label="採果工具">
+        <details class="tool-card route-panel" open>
+          <summary>
+            <span>路線規劃</span>
+            <strong id="selectedRouteSummary">0 朵</strong>
+          </summary>
+          <div class="route-header">
+            <h2>建議順序</h2>
+            <div class="route-controls">
+              <select id="travelModeInput" aria-label="路程模式">
+                <option value="walking">步行</option>
+                <option value="bicycling">腳踏車</option>
+                <option value="scooter">騎車</option>
+                <option value="driving">開車</option>
+              </select>
+              <select id="filterInput" aria-label="篩選花點">
+                <option value="active">可採優先</option>
+                <option value="all">全部</option>
+                <option value="unclaimed">未採果</option>
+              </select>
+            </div>
+          </div>
+          <div class="route-basket" aria-label="已選路線">
+            <div>
+              <span>已選路線</span>
+              <p id="selectedRouteHint">勾選想去的花點，再交給 Google Maps 導航。</p>
+            </div>
+            <div class="route-basket-actions">
+              <button id="selectReachableButton" class="secondary compact" type="button">選可採</button>
+              <button id="clearRouteButton" class="secondary compact" type="button">清除</button>
+              <button id="planRouteButton" class="primary compact" type="button">規劃整體路線</button>
+            </div>
+          </div>
+          <div id="flowerList" class="flower-list"></div>
+        </details>
+
+        <details class="tool-card stats-panel">
+          <summary>
+            <span>統計</span>
+            <strong id="nearestLabel">尚無花點</strong>
+          </summary>
+          <section class="status-grid" aria-label="目前採果狀態">
+            <div>
+              <span>總花點</span>
+              <strong id="totalCount">0</strong>
+            </div>
+            <div>
+              <span>可採</span>
+              <strong id="readyCount">0</strong>
+            </div>
+            <div>
+              <span>快結束</span>
+              <strong id="urgentCount">0</strong>
+            </div>
+            <div>
+              <span>來得及</span>
+              <strong id="reachableCount">待定位</strong>
+            </div>
+            <div>
+              <span>最近距離</span>
+              <strong id="nearestDistance">待定位</strong>
+            </div>
+          </section>
+        </details>
+
+        <details class="tool-card sync-panel" aria-label="多人共享同步設定">
         <summary>
           <span>多人共享</span>
           <strong id="syncSummary">尚未設定同步</strong>
@@ -71,7 +119,7 @@
         <p id="syncHint" class="hint">朋友們使用同一個同步網址，就會看到同一批巨大花朵。</p>
       </details>
 
-      <details class="input-panel" aria-label="新增巨大花朵" open>
+        <details class="tool-card input-panel" aria-label="新增巨大花朵">
         <summary>
           <span>新增巨大花朵</span>
           <strong>貼連結、選花種、輸入剩餘時間</strong>
@@ -118,50 +166,6 @@
         </div>
         <p id="inputHint" class="hint">短網址如果抓不到座標，請先打開連結，再複製瀏覽器網址列中的完整 Google Maps 網址。</p>
       </details>
-
-      <section class="map-layout">
-        <div class="map-panel">
-          <div class="map-toolbar">
-            <div>
-              <h2>採果地圖</h2>
-              <p id="mapCaption">新增花點後會依照位置畫在這裡。</p>
-            </div>
-            <button id="fitButton" class="secondary compact" type="button">重新置中</button>
-          </div>
-          <div id="mapCanvas" class="map-canvas" aria-label="巨大花朵相對位置地圖"></div>
-        </div>
-
-        <aside class="route-panel">
-          <div class="route-header">
-            <h2>建議順序</h2>
-            <div class="route-controls">
-              <select id="travelModeInput" aria-label="路程模式">
-                <option value="walking">步行</option>
-                <option value="bicycling">腳踏車</option>
-                <option value="scooter">騎車</option>
-                <option value="driving">開車</option>
-              </select>
-              <select id="filterInput" aria-label="篩選花點">
-                <option value="active">可採優先</option>
-                <option value="all">全部</option>
-                <option value="unclaimed">未採果</option>
-              </select>
-            </div>
-          </div>
-          <div class="route-basket" aria-label="已選路線">
-            <div>
-              <span>已選路線</span>
-              <strong id="selectedRouteSummary">0 朵</strong>
-              <p id="selectedRouteHint">勾選想去的花點，再交給 Google Maps 導航。</p>
-            </div>
-            <div class="route-basket-actions">
-              <button id="selectReachableButton" class="secondary compact" type="button">選可採</button>
-              <button id="clearRouteButton" class="secondary compact" type="button">清除</button>
-              <button id="planRouteButton" class="primary compact" type="button">規劃整體路線</button>
-            </div>
-          </div>
-          <div id="flowerList" class="flower-list"></div>
-        </aside>
       </section>
     </main>
 
