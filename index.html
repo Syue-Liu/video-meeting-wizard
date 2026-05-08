@@ -134,9 +134,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .msg-bubble{background:#f0f0f0;border-radius:4px 14px 14px 14px;padding:14px 15px;font-size:13px;line-height:1.75;white-space:pre-wrap;color:#1a1a1a;margin:14px 0;font-family:'Noto Sans TC',sans-serif}
 .btn-full{width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px}
 .btn-mail{background:#2563EB}
-.btn-pdf{background:#7C3AED}
-.btn-share{background:#0F6E56}
-.btn-reset{width:100%;padding:13px;background:transparent;border:1.5px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 .info-banner{background:var(--teal-light);border-radius:9px;padding:10px 12px;font-size:12px;color:var(--teal-dark);line-height:1.5;margin-top:8px}
 .toast{position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-8px);background:#111;color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;opacity:0;pointer-events:none;transition:all .25s;white-space:nowrap;z-index:999}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -200,7 +197,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
   .sync-sheet{width:calc(100% - 16px);bottom:8px;padding:14px;border-radius:16px}
   .sync-grid{grid-template-columns:1fr}
   .edit-jump-grid{grid-template-columns:1fr 1fr}
-  .sync-btn,.btn-full,.btn-reset{min-height:48px}
+  .sync-btn,.btn-full{min-height:48px}
   .nav-bar{padding:10px 12px 14px}
   .btn-back{padding:13px 14px}
   .opt-top{align-items:flex-start}
@@ -209,7 +206,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 }
 @media print{
   body{max-width:none;background:#fff}
-  .hdr,.nav-bar,.sync-backdrop,.sync-sheet,.toast,.btn-full,.btn-reset{display:none!important}
+  .hdr,.nav-bar,.sync-backdrop,.sync-sheet,.toast,.btn-full{display:none!important}
   .wrap{padding:0}
   .msg-bubble{background:#fff;border:1px solid #ddd;border-radius:8px;color:#111;font-size:12pt}
 }
@@ -920,136 +917,6 @@ function mailMsg(){
   const body=buildMsg();
   const url=`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href=url;
-}
-
-function printPdf(){
-  collectStep();
-  const title=`視訊會議需求確認${F.client?' - '+F.client:''}`;
-  const msg=buildMsg();
-  const html=`<!doctype html><html lang="zh-TW"><head><meta charset="UTF-8"><title>${esc(title)}</title>
-  <style>
-    body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;color:#111827;margin:32px;line-height:1.7}
-    h1{font-size:22px;margin:0 0 6px;color:#085041}
-    .meta{font-size:12px;color:#6B7280;margin-bottom:18px}
-    pre{white-space:pre-wrap;font-family:inherit;font-size:13px;border:1px solid #E5E7EB;border-radius:12px;padding:18px;background:#F9FAFB}
-    @page{margin:18mm}
-  </style></head><body><h1>${esc(title)}</h1><div class="meta">產生時間：${new Date().toLocaleString('zh-TW')}</div><pre>${esc(msg)}</pre>
-<!-- ── Detail bottom sheet ── -->
-<div class="det-bd" id="det-bd" onclick="closeDetail()"></div>
-<div class="det-sh" id="det-sh">
-  <div class="det-hdr" id="det-hdr">
-    <div class="det-drag"></div>
-    <div class="det-hdr-row">
-      <div class="det-ico" id="det-ico"></div>
-      <div><div class="det-ttl" id="det-ttl"></div><span class="det-tag" id="det-tag"></span></div>
-      <button class="det-close" onclick="closeDetail()">✕</button>
-    </div>
-  </div>
-  <div class="det-body">
-    <div class="det-sec">
-      <div class="det-lbl" id="det-lbl-d">📖 說明</div>
-      <textarea class="det-ta" id="det-d" rows="4" oninput="agDet(this)"></textarea>
-      <div class="det-hint">點擊文字即可編輯，修改後自動儲存</div>
-    </div>
-    <div class="det-sec">
-      <div class="det-lbl" id="det-lbl-s">🎯 適用場合</div>
-      <textarea class="det-ta" id="det-s" rows="2" oninput="agDet(this)"></textarea>
-    </div>
-    <div class="det-sec">
-      <div class="det-lbl" id="det-lbl-n">⚠️ 注意事項</div>
-      <textarea class="det-ta" id="det-n" rows="2" oninput="agDet(this)"></textarea>
-    </div>
-  </div>
-</div>
-
-
-<!-- ── Sales editor sheet ── -->
-<div class="se-bd" id="se-bd" onclick="closeSalesEdit()"></div>
-<div class="se-sh" id="se-sh">
-  <div class="se-hdr">
-    <div class="se-drag"></div>
-    <div class="se-title">✏️ 業務名單維護</div>
-    <div class="se-sub">可新增、刪除，儲存後在本裝置永久生效</div>
-  </div>
-  <div class="se-body">
-    <ul class="se-list" id="se-list"></ul>
-    <div class="se-add-row">
-      <input class="se-inp" id="se-inp" placeholder="輸入姓名後按新增" maxlength="10">
-      <button class="se-add" onclick="seAddName()">新增</button>
-    </div>
-  </div>
-  <div class="se-foot">
-    <button class="se-save" onclick="saveSalesEdit()">儲存並套用</button>
-    <button class="se-close" onclick="closeSalesEdit()">取消</button>
-  </div>
-</div>
-</body></html>`;
-  const w=window.open('','_blank');
-  if(!w){toastText('請允許彈出視窗後再產生 PDF');return;}
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-  w.focus();
-  setTimeout(()=>w.print(),250);
-}
-
-async function shareMsg(){
-  collectStep();
-  const title=`視訊會議需求確認${F.client?' - '+F.client:''}`;
-  const text=buildMsg();
-  if(navigator.share){
-    try{await navigator.share({title,text});return;}
-    catch(e){if(e.name==='AbortError')return;}
-  }
-  cpyMsg();
-  toastText('已複製，可貼到 Email、LINE 或其他 App');
-}
-
-function draftPayload(type){
-  const payload=currentPayload();
-  const isClient=type==='client';
-  const to=F.clientEmail;
-  const subject=isClient
-    ? `視訊會議需求確認${F.client?' - '+F.client:''}${F.date?' - '+F.date:''}`
-    : `廠商協助報價｜視訊會議需求${F.client?' - '+F.client:''}${F.date?' - '+F.date:''}`;
-  const greeting=isClient
-    ? `${F.client||'您好'}，以下先跟您確認本次視訊會議需求：`
-    : `您好，想詢問以下視訊會議／直播案是否可支援並協助報價：`;
-  return {
-    ...payload,
-    action:'draft',
-    draftType:type,
-    to,
-    subject,
-    body:`${greeting}\n\n${payload.message}\n\n謝謝。`
-  };
-}
-
-async function createGmailDraft(type){
-  saveSyncSettings();
-  if(!syncSettings.url){openSync();syncNote('請先貼上 Apps Script Web App 網址，才能建立 Gmail 草稿。');return;}
-  collectStep();
-  const email=F.clientEmail;
-  if(!email){alert('請先填寫客戶 Email。');cur=0;goBack=true;render();window.scrollTo(0,0);return;}
-  const payload=draftPayload(type);
-  try{
-    await fetch(syncSettings.url,{method:'POST',body:JSON.stringify(payload)});
-    toastText('✅ 已建立客戶 Gmail 草稿');
-  }catch{
-    try{
-      await fetch(syncSettings.url,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
-      toastText('✅ 已送出建立客戶草稿');
-    }catch{
-      alert('建立 Gmail 草稿失敗，請確認 Apps Script 已重新部署並授權 Gmail。');
-    }
-  }
-}
-
-function resetAll(){
-  if(!confirm('確定要清空所有填寫內容嗎？'))return;
-  Object.assign(F,{date:'',dateEnd:'',client:'',phone:'',clientEmail:'',sales:'',venue:'',meetingType:null,attendees:null,attendeesCustom:'',platforms:[],platformOther:'',camera:null,cameraCount:2,recording:null,ppt:null,caption:null,captionCount:1,linkTime:'',linkNote:'',rehearsal:null,interpret:null,notes:''});
-  caseId='';localStorage.removeItem('vc_demo_case_id');
-  cur=0;goBack=false;render();
 }
 
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
