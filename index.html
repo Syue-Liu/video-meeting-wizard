@@ -828,37 +828,51 @@ function collectStep(){
 // ── MESSAGE ───────────────────────────────────────────
 
 function buildMsg(){
-  const camStr=F.camera==='多機攝影'?`多機攝影（${F.cameraCount} 台）`:(F.camera||'—');
-  const capStr=F.caption||'—';
+  const SEP='━━━━━━\n';
+  const shortMap={
+    '單機攝影（遙控攝影機）':'單機(遙控)',
+    '單機攝影（專人攝影）':'單機(專人)',
+    '視訊 ＋ 直播':'視訊+直播',
+    '需要・客戶提供設計':'需要(客供)',
+    '需要・我方製作':'需要(我製)',
+    '需要・客戶自備 USB':'需要(客供USB)',
+    '需要・我方提供 USB':'需要(我供USB)',
+    '有口譯需求':'有口譯',
+    '無口譯需求':'無口譯',
+    '不需要':'不需要'
+  };
+  const sv=v=>shortMap[v]||v||'—';
+  const camStr=F.camera==='多機攝影'?`多機(${F.cameraCount}台)`:sv(F.camera);
+  const capStr=sv(F.caption);
   const allPlats=[...(Array.isArray(F.platforms)?F.platforms:[])];
   if(F.platformOther&&F.platformOther.trim())allPlats.push(F.platformOther.trim());
-  const platStr=allPlats.length?allPlats.join('、'):'—';
+  const platStr=allPlats.length?allPlats.map(sv).join('、'):'—';
   const ltStr=F.linkTime?F.linkTime.replace('T',' '):'—';
   const attStr=F.attendeesCustom?F.attendeesCustom+' 人':(F.attendees||'—');
   let m='📋 視訊會議需求確認\n';
-  m+='━━━━━━━━━━━━━━━━\n';
+  m+=SEP;
   const dateStr=F.dateEnd?`${F.date} 〜 ${F.dateEnd}`:F.date||'—';
-  m+=`📅 活動日期：${dateStr}\n`;
-  m+=`🏢 客　　戶：${F.client||'—'}\n`;
-  m+=`📞 聯絡電話：${F.phone||'—'}\n`;
-  if(F.sales)m+=`👤 負責業務：${F.sales}\n`;
-  if(F.venue)m+=`📍 活動地點：${F.venue}\n`;
-  m+='━━━━━━━━━━━━━━━━\n';
-  m+=`🎥 會議型式：${F.meetingType||'—'}\n`;
-  m+=`👥 遠端人數：${attStr}\n`;
-  m+=`💻 使用平台：${platStr}\n`;
-  m+='━━━━━━━━━━━━━━━━\n';
-  m+=`📸 攝影配置：${camStr}\n`;
-  m+=`🎞️ 錄影需求：${F.recording||'—'}\n`;
-  m+=`📊 接入 PPT：${F.ppt||'—'}\n`;
-  m+=`🪧 字卡需求：${capStr}\n`;
-  m+='━━━━━━━━━━━━━━━━\n';
-  m+=`🔗 連結時間：${ltStr}\n`;
-  if(F.linkNote)m+=`   補　　充：${F.linkNote}\n`;
-  m+=`🎬 付費彩排：${F.rehearsal||'—'}\n`;
-  m+=`🌐 口譯需求：${F.interpret||'—'}\n`;
-  if(F.notes){m+='━━━━━━━━━━━━━━━━\n';m+=`📝 備　　註：${F.notes}\n`;}
-  m+='━━━━━━━━━━━━━━━━\n';
+  m+=`📅 日期：${dateStr}\n`;
+  m+=`🏢 客戶：${F.client||'—'}\n`;
+  m+=`📞 電話：${F.phone||'—'}\n`;
+  if(F.sales)m+=`👤 業務：${F.sales}\n`;
+  if(F.venue)m+=`📍 地點：${F.venue}\n`;
+  m+=SEP;
+  m+=`🎥 型式：${sv(F.meetingType)}\n`;
+  m+=`👥 人數：${attStr}\n`;
+  m+=`💻 平台：${platStr}\n`;
+  m+=SEP;
+  m+=`📸 攝影：${camStr}\n`;
+  m+=`🎞️ 錄影：${sv(F.recording)}\n`;
+  m+=`📊 PPT：${sv(F.ppt)}\n`;
+  m+=`🪧 字卡：${capStr}\n`;
+  m+=SEP;
+  m+=`🔗 連結：${ltStr}\n`;
+  if(F.linkNote)m+=`補充：${F.linkNote}\n`;
+  m+=`🎬 彩排：${sv(F.rehearsal)}\n`;
+  m+=`🌐 口譯：${sv(F.interpret)}\n`;
+  if(F.notes){m+=SEP;m+=`📝 備註：${F.notes}\n`;}
+  m+=SEP;
   m+='（以上需求請確認，謝謝）';
   return m;
 }
@@ -1260,6 +1274,7 @@ render();
     </div>
   </div>
 </div>
+
 
 <!-- ── Sales editor sheet ── -->
 <div class="se-bd" id="se-bd" onclick="closeSalesEdit()"></div>
