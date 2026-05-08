@@ -126,6 +126,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .done-ico{font-size:54px;margin-bottom:10px}
 .done-ttl{font-size:22px;font-weight:700;margin-bottom:5px}
 .done-sub{font-size:13px;color:var(--muted);line-height:1.5}
+.edit-jump{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;margin:0 0 14px}
+.edit-jump-ttl{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:9px}
+.edit-jump-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.edit-jump-btn{border:1.5px solid var(--border);border-radius:11px;background:#fff;color:var(--teal-dark);font-size:13px;font-weight:700;padding:10px 8px;cursor:pointer;font-family:inherit}
+.edit-jump-btn:active{background:var(--teal-light);border-color:var(--teal)}
 .msg-bubble{background:#f0f0f0;border-radius:4px 14px 14px 14px;padding:14px 15px;font-size:13px;line-height:1.75;white-space:pre-wrap;color:#1a1a1a;margin:14px 0;font-family:'Noto Sans TC',sans-serif}
 .btn-full{width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px}
 .btn-mail{background:#2563EB}
@@ -194,6 +199,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
   .form-inp[type="date"]::-webkit-date-and-time-value,.form-inp[type="datetime-local"]::-webkit-date-and-time-value{line-height:20px}
   .sync-sheet{width:calc(100% - 16px);bottom:8px;padding:14px;border-radius:16px}
   .sync-grid{grid-template-columns:1fr}
+  .edit-jump-grid{grid-template-columns:1fr 1fr}
   .sync-btn,.btn-full,.btn-reset{min-height:48px}
   .nav-bar{padding:10px 12px 14px}
   .btn-back{padding:13px 14px}
@@ -689,6 +695,7 @@ function buildNotes(){
 function buildDone(){
   const msg=buildMsg();
   return `<div class="done-hero"><div class="done-ico">✅</div><div class="done-ttl">需求確認完成！</div><div class="done-sub">以下是整理好的 LINE 訊息<br>可直接複製傳給廠商確認</div></div>
+  ${buildEditJump()}
   <div class="msg-bubble">${esc(msg)}</div>
   <button class="btn-full" style="background:#00B900" onclick="cpyMsg()">📋 複製 LINE 訊息</button>
   <button class="btn-full btn-mail" onclick="mailMsg()">✉️ 轉寄 Email 草稿</button>
@@ -696,6 +703,24 @@ function buildDone(){
   <button class="btn-full btn-pdf" onclick="printPdf()">📄 產生 PDF 分享</button>
   <button class="btn-full btn-share" onclick="shareMsg()">↗️ 系統分享</button>
   <button class="btn-reset" onclick="resetAll()">重新填寫</button>`;
+}
+
+function buildEditJump(){
+  const items=[
+    ['基本資料',0],
+    ['會議型式',1],
+    ['與會人數',2],
+    ['使用平台',3],
+    ['攝影配置',4],
+    ['錄影需求',5],
+    ['接入 PPT',6],
+    ['字卡需求',7],
+    ['連結時間',8],
+    ['付費彩排',9],
+    ['口譯需求',10],
+    ['備註',11],
+  ];
+  return `<div class="edit-jump"><div class="edit-jump-ttl">要修改哪一項？</div><div class="edit-jump-grid">${items.map(([label,index])=>`<button class="edit-jump-btn" onclick="jumpToStep(${index})">${label}</button>`).join('')}</div></div>`;
 }
 
 // ── EVENTS ────────────────────────────────────────────
@@ -805,6 +830,14 @@ function goNext(){
 function goPrev(){
   collectStep();
   if(cur>0){cur--;goBack=true;render();window.scrollTo(0,0);}
+}
+
+function jumpToStep(index){
+  collectStep();
+  cur=Math.max(0,Math.min(index,SD.length-1));
+  goBack=true;
+  render();
+  window.scrollTo(0,0);
 }
 
 function collectStep(){
