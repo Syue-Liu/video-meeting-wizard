@@ -126,11 +126,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .done-ico{font-size:54px;margin-bottom:10px}
 .done-ttl{font-size:22px;font-weight:700;margin-bottom:5px}
 .done-sub{font-size:13px;color:var(--muted);line-height:1.5}
-.edit-jump{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;margin:0 0 14px}
-.edit-jump-ttl{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:9px}
-.edit-jump-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.edit-jump{background:#fff;border:1px solid var(--border);border-radius:14px;margin:0 0 14px;overflow:hidden}
+.edit-jump-sum{list-style:none;padding:12px 14px;font-size:13px;font-weight:800;color:var(--teal-dark);cursor:pointer;display:flex;align-items:center;justify-content:space-between;-webkit-tap-highlight-color:transparent}
+.edit-jump-sum::-webkit-details-marker{display:none}
+.edit-jump-sum::after{content:'展開';font-size:12px;color:var(--muted);font-weight:700}
+.edit-jump[open] .edit-jump-sum{border-bottom:1px solid var(--border)}
+.edit-jump[open] .edit-jump-sum::after{content:'收合'}
+.edit-jump-grid{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .edit-jump-btn{border:1.5px solid var(--border);border-radius:11px;background:#fff;color:var(--teal-dark);font-size:13px;font-weight:700;padding:10px 8px;cursor:pointer;font-family:inherit}
 .edit-jump-btn:active{background:var(--teal-light);border-color:var(--teal)}
+.return-done-btn{width:100%;margin:18px 0 0;padding:13px;border:1.5px solid var(--teal);border-radius:12px;background:var(--teal-light);color:var(--teal-dark);font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.return-done-btn:active{background:#cfecdf}
 .msg-bubble{background:#f0f0f0;border-radius:4px 14px 14px 14px;padding:14px 15px;font-size:13px;line-height:1.75;white-space:pre-wrap;color:#1a1a1a;margin:14px 0;font-family:'Noto Sans TC',sans-serif}
 .btn-full{width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px}
 .btn-mail{background:#2563EB}
@@ -184,6 +190,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;back
 .se-foot{padding:12px 16px 20px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px}
 .se-save{flex:1;padding:13px;border:none;border-radius:12px;background:var(--teal);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
 .se-close{padding:13px 18px;border:1.5px solid var(--border);border-radius:12px;background:#fff;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.copy-bd{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:900;display:none}
+.copy-bd.show{display:block}
+.copy-sh{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;max-height:86vh;background:#fff;border-radius:20px 20px 0 0;z-index:910;display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.32,.72,0,1);overflow:hidden}
+.copy-sh.show{transform:translateX(-50%) translateY(0)}
+.copy-hdr{padding:14px 16px 12px;border-bottom:1px solid var(--border)}
+.copy-drag{width:36px;height:4px;background:#d1d5db;border-radius:2px;margin:0 auto 10px}
+.copy-title{font-size:18px;font-weight:800;margin-bottom:3px}
+.copy-sub{font-size:12px;color:var(--muted);line-height:1.45}
+.copy-body{padding:14px 16px;overflow:auto}
+.copy-ta{width:100%;min-height:260px;border:1.5px solid var(--border);border-radius:12px;padding:12px;font-family:inherit;font-size:15px;line-height:1.65;resize:vertical;outline:none;background:#fafafa}
+.copy-ta:focus{border-color:var(--teal-mid);background:#fff}
+.copy-foot{display:flex;gap:8px;padding:12px 16px 20px;border-top:1px solid var(--border)}
+.copy-primary{flex:1;padding:13px;border:none;border-radius:12px;background:#00B900;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.copy-close{padding:13px 18px;border:1.5px solid var(--border);border-radius:12px;background:#fff;color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
 @keyframes sfwd{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
 @keyframes sbk{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:430px){
@@ -410,7 +430,7 @@ const SD = [
 
 // ── STATE ─────────────────────────────────────────────
 
-let cur=0,goBack=false;
+let cur=0,goBack=false,editingFromDone=false;
 const F={
   date:'',dateEnd:'',client:'',phone:'',clientEmail:'',sales:'',venue:'',
   meetingType:null,attendees:null,attendeesCustom:'',
@@ -544,6 +564,7 @@ function buildStep(s){
   else if(s.type==='timing')h+=buildTiming();
   else if(s.type==='notes')h+=buildNotes();
   else if(s.type==='done')h+=buildDone();
+  if(s.type!=='done'&&editingFromDone)h+=`<button class="return-done-btn" onclick="returnToDone()">修改完成，回需求確認</button>`;
   return h;
 }
 
@@ -713,7 +734,7 @@ function buildEditJump(){
     ['口譯需求',10],
     ['備註',11],
   ];
-  return `<div class="edit-jump"><div class="edit-jump-ttl">要修改哪一項？</div><div class="edit-jump-grid">${items.map(([label,index])=>`<button class="edit-jump-btn" onclick="jumpToStep(${index})">${label}</button>`).join('')}</div></div>`;
+  return `<details class="edit-jump"><summary class="edit-jump-sum">要修改哪一項？</summary><div class="edit-jump-grid">${items.map(([label,index])=>`<button class="edit-jump-btn" onclick="jumpToStep(${index})">${label}</button>`).join('')}</div></details>`;
 }
 
 // ── EVENTS ────────────────────────────────────────────
@@ -817,18 +838,28 @@ function chgCnt(t,d){
 
 function goNext(){
   collectStep();
-  if(cur<SD.length-1){cur++;goBack=false;render();window.scrollTo(0,0);}
+  if(cur<SD.length-1){cur++;goBack=false;if(SD[cur].type==='done')editingFromDone=false;render();window.scrollTo(0,0);}
 }
 
 function goPrev(){
   collectStep();
-  if(cur>0){cur--;goBack=true;render();window.scrollTo(0,0);}
+  if(cur>0){cur--;goBack=true;if(SD[cur].type==='done')editingFromDone=false;render();window.scrollTo(0,0);}
 }
 
 function jumpToStep(index){
   collectStep();
+  editingFromDone=SD[cur]?.type==='done';
   cur=Math.max(0,Math.min(index,SD.length-1));
   goBack=true;
+  render();
+  window.scrollTo(0,0);
+}
+
+function returnToDone(){
+  collectStep();
+  editingFromDone=false;
+  cur=SD.length-1;
+  goBack=false;
   render();
   window.scrollTo(0,0);
 }
@@ -903,13 +934,59 @@ function buildMsg(){
   return m;
 }
 
-function cpyMsg(){
+async function cpyMsg(){
+  collectStep();
   const msg=buildMsg();
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(msg).then(toast);}
-  else{const ta=document.createElement('textarea');ta.value=msg;Object.assign(ta.style,{position:'fixed',opacity:'0'});document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast();}
+  const ok=await copyText(msg);
+  if(ok)toastText('✅ LINE 訊息已複製');
+  else openCopySheet(msg);
 }
 
 function toast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+async function copyText(text){
+  if(navigator.clipboard&&window.isSecureContext){
+    try{await navigator.clipboard.writeText(text);return true;}
+    catch{}
+  }
+  return legacyCopy(text);
+}
+
+function legacyCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.setAttribute('readonly','');
+  Object.assign(ta.style,{position:'fixed',top:'0',left:'0',width:'1px',height:'1px',opacity:'0',fontSize:'16px'});
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0,ta.value.length);
+  let ok=false;
+  try{ok=document.execCommand('copy');}catch{}
+  document.body.removeChild(ta);
+  return ok;
+}
+
+function openCopySheet(text){
+  const ta=document.getElementById('copy-text');
+  ta.value=text;
+  document.getElementById('copy-bd').classList.add('show');
+  document.getElementById('copy-sh').classList.add('show');
+  setTimeout(()=>{ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);},80);
+  toastText('請長按文字手動複製');
+}
+
+function closeCopySheet(){
+  document.getElementById('copy-bd').classList.remove('show');
+  document.getElementById('copy-sh').classList.remove('show');
+}
+
+async function copySheetText(){
+  const ta=document.getElementById('copy-text');
+  const ok=await copyText(ta.value);
+  if(ok){toastText('✅ 已複製');closeCopySheet();}
+  else{ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);toastText('請長按文字選擇複製');}
+}
 
 function mailMsg(){
   collectStep();
@@ -1190,6 +1267,23 @@ render();
   <div class="se-foot">
     <button class="se-save" onclick="saveSalesEdit()">儲存並套用</button>
     <button class="se-close" onclick="closeSalesEdit()">取消</button>
+  </div>
+</div>
+
+<!-- ── Manual copy sheet ── -->
+<div class="copy-bd" id="copy-bd" onclick="closeCopySheet()"></div>
+<div class="copy-sh" id="copy-sh">
+  <div class="copy-hdr">
+    <div class="copy-drag"></div>
+    <div class="copy-title">LINE 訊息</div>
+    <div class="copy-sub">如果手機瀏覽器擋住自動複製，請長按下方文字選擇複製。</div>
+  </div>
+  <div class="copy-body">
+    <textarea class="copy-ta" id="copy-text" readonly></textarea>
+  </div>
+  <div class="copy-foot">
+    <button class="copy-primary" onclick="copySheetText()">再試一次複製</button>
+    <button class="copy-close" onclick="closeCopySheet()">關閉</button>
   </div>
 </div>
 </body>
